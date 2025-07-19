@@ -37,3 +37,10 @@ func GetPiplineStatus(projectID string, accessToken string) ([]Pipeline, error){
 	return pipelines, nil
 
 }
+
+func DisplayPipelines(pipelines []Pipeline) {
+	for _, pipe := range pipelines{
+		fmt.Printf("ID: %d | Status: %s | Created: %s | URL: %s\n",
+			pipe.ID, pipe.Status, pipe.Created, pipe.WebURL)
+	}
+}
