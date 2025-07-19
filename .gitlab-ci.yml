@@ -2,3 +2,8 @@ firstStage:
     stage: test
     script:
         - echo "Hello My First Line"
+    only:
+        changes:
+            - cmd/*
+            - utils/*
+            - main.go
