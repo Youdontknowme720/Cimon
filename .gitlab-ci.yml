@@ -1,6 +1,3 @@
-stages:
-    - test
-
 firstStage:
     stage: test
     script:
