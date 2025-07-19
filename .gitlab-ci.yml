@@ -7,3 +7,4 @@ firstStage:
             - cmd/*
             - utils/*
             - main.go
+            - .gitlab-ci.yml

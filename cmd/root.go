@@ -9,7 +9,6 @@ var rootCmd = &cobra.Command{
     Short: "Dein CLI Tool",
 }
 
-// Execute wird in main.go aufgerufen
 func Execute() error {
     return rootCmd.Execute()
 }
