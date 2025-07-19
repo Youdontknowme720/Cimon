@@ -1,0 +1,7 @@
+stages:
+    - test
+
+firstStage:
+    stage: test
+    script:
+        - echo "Hello My First Line"
