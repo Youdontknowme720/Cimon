@@ -6,14 +6,14 @@ import (
 	"net/http"
 )
 
-type Pipeline struct{
-	ID int `json:"id"`
-	Status string `json:"status"`
+type Pipeline struct {
+	ID      int    `json:"id"`
+	Status  string `json:"status"`
 	Created string `json:"created_at"`
-	WebURL string `json:"web_url"`
+	WebURL  string `json:"web_url"`
 }
 
-func GetPiplineStatus(projectID string, accessToken string) ([]Pipeline, error){
+func GetPiplineStatus(projectID string, accessToken string) ([]Pipeline, error) {
 	url := fmt.Sprintf("https://gitlab.com/api/v4/projects/%s/pipelines", projectID)
 
 	req, err := http.NewRequest("GET", url, nil)
@@ -39,7 +39,7 @@ func GetPiplineStatus(projectID string, accessToken string) ([]Pipeline, error){
 }
 
 func DisplayPipelines(pipelines []Pipeline) {
-	for _, pipe := range pipelines{
+	for _, pipe := range pipelines {
 		fmt.Printf("ID: %d | Status: %s | Created: %s | URL: %s\n",
 			pipe.ID, pipe.Status, pipe.Created, pipe.WebURL)
 	}

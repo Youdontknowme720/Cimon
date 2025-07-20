@@ -1,10 +1,10 @@
-
 package cmd
 
 import (
 	"fmt"
-	"gitlab.com/ayan0k0uji-group/Cimon/utils"
+
 	"github.com/spf13/cobra"
+	"gitlab.com/ayan0k0uji-group/Cimon/utils"
 )
 
 var projectID, token string
@@ -13,31 +13,47 @@ var cnt int
 var pipelineCmd = &cobra.Command{
 	Use:   "pipeline",
 	Short: "Zeigt Pipeline-Status von GitLab",
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
+		token, err := cmd.Flags().GetString("token")
+		if err != nil {
+			return err
+		}
+
+		if token == "" {
+			config, err := utils.LoadConfig()
+			if err != nil {
+				return fmt.Errorf("Couldn't load config %w: ", err)
+			}
+			token = config.Token
+		}
+
+		if token == "" {
+			return fmt.Errorf("Token is empty. Please set it using auth command or as a flag.")
+		}
+
 		var limit int
 		pipelines, err := utils.GetPiplineStatus(projectID, token)
 		if err != nil {
-			fmt.Println("Fehler beim Abrufen:", err)
-			return
+			return fmt.Errorf("Error while fetching pipelines: %w", err)
 		}
-		countSet:= cmd.Flags().Changed("counter")
-		if countSet{
-			if cnt > len(pipelines){
+		countSet := cmd.Flags().Changed("counter")
+		if countSet {
+			if cnt > len(pipelines) {
 				limit = len(pipelines)
 			}
 			limit = cnt
 			utils.DisplayPipelines(pipelines[:limit])
-		}else{
+		} else {
 			utils.DisplayPipelines(pipelines)
 		}
+		return nil
 	},
 }
 
 func init() {
 	pipelineCmd.Flags().StringVarP(&projectID, "project", "p", "", "GitLab Project ID (required)")
-	pipelineCmd.Flags().StringVarP(&token, "token", "t", "", "GitLab Private Token (required)")
+	pipelineCmd.Flags().StringP("token", "t", "", "GitLab Private Token (optional)")
 	pipelineCmd.Flags().IntVar(&cnt, "counter", 1, "Show nth latest pipelines")
 	pipelineCmd.MarkFlagRequired("project")
-	pipelineCmd.MarkFlagRequired("token")
 	rootCmd.AddCommand(pipelineCmd)
 }
