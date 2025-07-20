@@ -38,10 +38,10 @@ var pipelineCmd = &cobra.Command{
 		}
 		countSet := cmd.Flags().Changed("counter")
 		if countSet {
+			limit = cnt
 			if cnt > len(pipelines) {
 				limit = len(pipelines)
 			}
-			limit = cnt
 			utils.DisplayPipelines(pipelines[:limit])
 
 		} else{
