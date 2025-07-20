@@ -7,7 +7,7 @@ import (
 	"gitlab.com/ayan0k0uji-group/Cimon/utils"
 )
 
-var projectID, token string
+var projectID string
 var cnt int
 
 var pipelineCmd = &cobra.Command{
@@ -43,8 +43,23 @@ var pipelineCmd = &cobra.Command{
 			}
 			limit = cnt
 			utils.DisplayPipelines(pipelines[:limit])
-		} else {
+
+		} else{
 			utils.DisplayPipelines(pipelines)
+		}
+
+		hasFailed, failedPipes := utils.HasFaildePipelines(pipelines[:limit])
+		
+		if hasFailed{
+			for _, pipe := range failedPipes{
+				failedJobs, err := utils.GetJobDetails(projectID, pipe.ID, token)
+				if err != nil{
+					fmt.Printf("❌ FEHLER beim Abrufen der Jobs: %v\n", err)
+				}
+				utils.DisplayJobs(failedJobs)
+				logs, _ := utils.GetJobsLog(projectID, failedJobs[0].ID, token)
+				fmt.Print(logs)
+			}
 		}
 		return nil
 	},
