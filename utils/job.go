@@ -8,12 +8,27 @@ import (
 	"strings"
 )
 
-type Pipeline struct {
-	ID      int    `json:"id"`
-	Status  string `json:"status"`
-	Created string `json:"created_at"`
-	WebURL  string `json:"web_url"`
+func statusEmoji(status string) string {
+	switch status {
+	case "success":
+		return "✅"
+		case "failed":
+		return "❌"
+		case "running":
+		return "🏃"
+		case "pending":
+		return "⏳"
+		case "canceled":
+		return "🚫"
+		case "manual":
+		return "✋"
+		case "skipped":
+		return "⤵️"
+		default:
+		return "❔"
+	}
 }
+
 
 type Job struct{
 	ID int `json:"id"`
@@ -24,31 +39,9 @@ type Job struct{
 	WebURL string `json:"web_url"`
 }
 
-func GetPiplineStatus(projectID string, accessToken string) ([]Pipeline, error) {
-	url := fmt.Sprintf("https://gitlab.com/api/v4/projects/%s/pipelines", projectID)
+type Jobs []Job
 
-	req, err := http.NewRequest("GET", url, nil)
-	if err != nil {
-		return nil, err
-	}
-	req.Header.Add("PRIVATE-TOKEN", accessToken)
-
-	client := &http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var pipelines []Pipeline
-	if err := json.NewDecoder(resp.Body).Decode(&pipelines); err != nil {
-		return nil, err
-	}
-
-	return pipelines, nil
-
-}
-func GetJobDetails(projectID string, pipelineID int, accessToken string) ([]Job, error) {
+func GetJobDetails(projectID string, pipelineID int, accessToken string) (Jobs, error) {
 	url := fmt.Sprintf("https://gitlab.com/api/v4/projects/%s/pipelines/%d/jobs", projectID, pipelineID)
 
 	req, err := http.NewRequest("GET", url, nil)
@@ -83,8 +76,8 @@ func GetJobDetails(projectID string, pipelineID int, accessToken string) ([]Job,
 	return jobs, nil
 }
 
-func GetJobsLog(projectID string, jobID int, accessToken string) (string, error) {
-	url := fmt.Sprintf("https://gitlab.com/api/v4/projects/%s/jobs/%d/trace", projectID, jobID)
+func (job Job) GetJobsLog(projectID string, accessToken string) (string, error) {
+	url := fmt.Sprintf("https://gitlab.com/api/v4/projects/%s/jobs/%d/trace", projectID, job.ID)
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return "", err
@@ -106,4 +99,18 @@ func GetJobsLog(projectID string, jobID int, accessToken string) (string, error)
 	}
 
 	return buf.String(), nil
+}
+
+func (jobs Jobs) DisplayJobs() {
+	for _, job := range jobs {
+		emoji := statusEmoji(job.Status)
+		fmt.Println("─────────────────────────────────────────────")
+		fmt.Printf("%s  Job-ID:    %d\n", emoji, job.ID)
+		fmt.Printf("👀  Name:      %s\n", job.Name)
+		fmt.Printf("📦  Stage:     %s\n", job.Stage)
+		fmt.Printf("📊  Status:    %s\n", job.Status)
+		fmt.Printf("⏱️  Dauer:     %.2fs\n", job.Duration)
+		fmt.Printf("🔗  URL:       %s\n", job.WebURL)
+	}
+	fmt.Println("─────────────────────────────────────────────")
 }
