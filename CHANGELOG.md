@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [version 0.4.0] Date 07-20-2025
+
 ### Changed
 
 - #4 Changed structure for structs and refactored functions for them
