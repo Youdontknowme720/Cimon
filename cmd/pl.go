@@ -11,7 +11,7 @@ var projectID string
 var cnt int
 
 var pipelineCmd = &cobra.Command{
-	Use:   "pipeline",
+	Use:   "pl",
 	Short: "Zeigt Pipeline-Status von GitLab",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		token, err := cmd.Flags().GetString("token")
@@ -32,7 +32,7 @@ var pipelineCmd = &cobra.Command{
 		}
 
 		var limit int
-		pipelines, err := utils.GetPiplineStatus(projectID, token)
+		pipelines, err := utils.GetPipelineStatus(projectID, token)
 		if err != nil {
 			return fmt.Errorf("Error while fetching pipelines: %w", err)
 		}
@@ -42,22 +42,22 @@ var pipelineCmd = &cobra.Command{
 			if cnt > len(pipelines) {
 				limit = len(pipelines)
 			}
-			utils.DisplayPipelines(pipelines[:limit])
+			pipelines[:limit].DisplayPipelines()
 
 		} else{
-			utils.DisplayPipelines(pipelines)
+			pipelines.DisplayPipelines()
 		}
 
-		hasFailed, failedPipes := utils.HasFaildePipelines(pipelines[:limit])
-		
+		hasFailed, failedPipes := pipelines[:limit].HasFailedPipelines()
+
 		if hasFailed{
 			for _, pipe := range failedPipes{
 				failedJobs, err := utils.GetJobDetails(projectID, pipe.ID, token)
 				if err != nil{
 					fmt.Printf("❌ FEHLER beim Abrufen der Jobs: %v\n", err)
 				}
-				utils.DisplayJobs(failedJobs)
-				logs, _ := utils.GetJobsLog(projectID, failedJobs[0].ID, token)
+				failedJobs.DisplayJobs()
+				logs, _ := failedJobs[0].GetJobsLog(projectID, token)
 				fmt.Print(logs)
 			}
 		}
