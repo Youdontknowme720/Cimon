@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"github.com/spf13/cobra"
-	"gitlab.com/ayan0k0uji-group/Cimon/utils"
+    "gitlab.com/ayan0k0uji-group/Cimon/gitlab"
 )
 
 var authCmd = &cobra.Command{
