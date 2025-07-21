@@ -10,7 +10,8 @@ import (
 )
 
 type Config struct {
-	Token string `yaml:"token"`
+	TokenGitlab string `yaml:"tokengitlab"`
+	TokenGithub string `yaml:"tokenGithub"`
 }
 
 var (

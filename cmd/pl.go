@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
-	"gitlab.com/ayan0k0uji-group/Cimon/utils"
+    "gitlab.com/ayan0k0uji-group/Cimon/gitlab"
 )
 
 var projectID string
@@ -14,7 +14,7 @@ var pipelineCmd = &cobra.Command{
 	Use:   "pl",
 	Short: "Zeigt Pipeline-Status von GitLab",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		token, err := cmd.Flags().GetString("token")
+		token, err := cmd.Flags().GetString("tokenGitlab")
 		if err != nil {
 			return err
 		}
@@ -24,11 +24,11 @@ var pipelineCmd = &cobra.Command{
 			if err != nil {
 				return fmt.Errorf("Couldn't load config %w: ", err)
 			}
-			token = config.Token
+			token = config.TokenGitlab
 		}
 
 		if token == "" {
-			return fmt.Errorf("Token is empty. Please set it using auth command or as a flag.")
+			return fmt.Errorf("TokenGitlab is empty. Please set it using auth command or as a flag.")
 		}
 
 		var limit int
@@ -67,7 +67,7 @@ var pipelineCmd = &cobra.Command{
 
 func init() {
 	pipelineCmd.Flags().StringVarP(&projectID, "project", "p", "", "GitLab Project ID (required)")
-	pipelineCmd.Flags().StringP("token", "t", "", "GitLab Private Token (optional)")
+	pipelineCmd.Flags().StringP("tokenGitlab", "t", "", "GitLab Private TokenGitlab (optional)")
 	pipelineCmd.Flags().IntVar(&cnt, "counter", 1, "Show nth latest pipelines")
 	pipelineCmd.MarkFlagRequired("project")
 	rootCmd.AddCommand(pipelineCmd)
