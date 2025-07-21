@@ -35,6 +35,8 @@ func GetWorkflowStatus(repo string, token string) (WorkflowRunsResponse, error){
 		panic(err)
 	}
 	defer resp.Body.Close()
+	fmt.Println(req.Header)
+	fmt.Println(resp.StatusCode)
 	if resp.StatusCode != 200{
 		panic(err)
 	}
@@ -46,7 +48,7 @@ func GetWorkflowStatus(repo string, token string) (WorkflowRunsResponse, error){
 	}
 
 	if result.TotalCount == 0 {
-		fmt.Println("Found no worklfows")
+		fmt.Println("Found no workflows")
 	}
 	return result, nil
 }
