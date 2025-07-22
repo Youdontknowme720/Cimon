@@ -29,8 +29,8 @@ func StartView(workflows github.WorkflowRunsResponse) {
 func buildWorkflowList(workflows github.WorkflowRunsResponse) *tview.List {
 	list := tview.NewList().
 		SetSelectedTextColor(tcell.ColorDarkOrange)
-	var conclusionColor = "red"
 	for _, wf := range workflows.WorkflowRuns {
+		var conclusionColor = "red"
 		label := fmt.Sprintf("%s", wf.DisplayTitle)
 		if wf.Conclusion == "success" {
 			conclusionColor = "darkgreen"
