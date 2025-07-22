@@ -2,11 +2,9 @@ package cmd
 
 import (
 	"fmt"
-	"gitlab.com/ayan0k0uji-group/Cimon/github"
-
 	"github.com/spf13/cobra"
-    "gitlab.com/ayan0k0uji-group/Cimon/gitlab"
-)
+	"github.com/Youdontknowme720/Cimon/gitlab"
+	"github.com/Youdontknowme720/Cimon/github")
 var repoUrl string
 var limit int
 

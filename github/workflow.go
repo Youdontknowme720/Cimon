@@ -17,7 +17,6 @@ type Workflow struct {
 	HtmlUrl string `json:"html_url"`
 }
 
-
 func GetWorkflowStatus(repo string, limit int, token string) (WorkflowRunsResponse, error){
 	url := fmt.Sprintf("https://api.github.com/repos/%s/actions/runs?per_page=%d", repo, limit)
 

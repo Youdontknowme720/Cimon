@@ -1,17 +1,22 @@
 package ui
 
 import (
+	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
+	"log"
 )
 
-func StartView(){
+func StartView() {
 	app := tview.NewApplication()
 
-	text := tview.NewTextView().
-		SetText("Hello a new View").
-		SetTextAlign(tview.AlignCenter)
+	text := tview.NewBox().
+		SetBorder(true).
+		SetBorderAttributes(tcell.AttrBold).
+		SetTitle("My First TviewBox")
 
-	if err := app.SetRoot(text, true); err != nil{
-		panic(err)
+	app.SetRoot(text, true)
+
+	if err := app.Run(); err != nil {
+		log.Fatalf("Run failed: %v", err)
 	}
 }

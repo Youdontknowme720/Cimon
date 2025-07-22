@@ -1,7 +1,7 @@
 package main
 
 import (
-	"gitlab.com/ayan0k0uji-group/Cimon/cmd"
+	"github.com/Youdontknowme720/Cimon/cmd"
 )
 
 func main() {
