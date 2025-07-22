@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
-    "gitlab.com/ayan0k0uji-group/Cimon/gitlab"
+	"github.com/Youdontknowme720/Cimon/gitlab"
 )
 
 var projectID string
