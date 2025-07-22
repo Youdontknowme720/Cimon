@@ -3,6 +3,7 @@ package ui
 import (
 	"fmt"
 	"github.com/Youdontknowme720/Cimon/github"
+	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
 	"log"
 )
@@ -26,15 +27,16 @@ func StartView(workflows github.WorkflowRunsResponse) {
 
 
 func buildWorkflowList(workflows github.WorkflowRunsResponse) *tview.List {
-	list := tview.NewList()
-
+	list := tview.NewList().
+		SetSelectedTextColor(tcell.ColorDarkOrange)
+	var conclusionColor = "red"
 	for _, wf := range workflows.WorkflowRuns {
-		label := fmt.Sprintf("%s [%s]", wf.Name, wf.Status)
-		desc := fmt.Sprintf("Conclusion: %s", wf.Conclusion)
-		list.AddItem(label, desc, 0, func(name string, status string, conclusion string) func() {
-			return func() {
-			}
-		}(wf.Name, wf.Status, wf.Conclusion))
+		label := fmt.Sprintf("%s", wf.DisplayTitle)
+		if wf.Conclusion == "success" {
+			conclusionColor = "darkgreen"
+		}
+		desc := fmt.Sprintf("\t [%s]%s[-]",conclusionColor, wf.Conclusion)
+		list.AddItem(label, desc, 0,nil)
 	}
 
 	list.AddItem("Beenden", "Programm schließen", 'q', func() {

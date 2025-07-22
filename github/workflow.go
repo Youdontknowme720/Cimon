@@ -11,7 +11,7 @@ type WorkflowRunsResponse struct {
 }
 type Workflow struct {
     ID int `json:"id"`
-	Name string `json:"name"`
+	DisplayTitle string `json:"display_title"`
 	Status string `json:"status"`
 	Conclusion string `json:"conclusion"`
 	HtmlUrl string `json:"html_url"`
