@@ -1,11 +1,17 @@
-name: Hello World Pipeline
+name: CimonPipe
 
 on: [push]
 
 jobs:
-    hello:
-        runs-on: ubuntu-latest
+  hello:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Say Hello
+        run: echo "Hello, World!"
 
-        steps:
-            - name: Say Hello
-              run: echo "Hello, World!"
+  goodbye:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Say Goodbye
+        run: echo "Goodbye, World!"
+
