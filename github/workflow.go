@@ -18,8 +18,8 @@ type Workflow struct {
 }
 
 
-func GetWorkflowStatus(repo string, token string) (WorkflowRunsResponse, error){
-	url := fmt.Sprintf("https://api.github.com/repos/%s/actions/runs", repo)
+func GetWorkflowStatus(repo string, limit int, token string) (WorkflowRunsResponse, error){
+	url := fmt.Sprintf("https://api.github.com/repos/%s/actions/runs?per_page=%d", repo, limit)
 
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil{
@@ -35,8 +35,6 @@ func GetWorkflowStatus(repo string, token string) (WorkflowRunsResponse, error){
 		panic(err)
 	}
 	defer resp.Body.Close()
-	fmt.Println(req.Header)
-	fmt.Println(resp.StatusCode)
 	if resp.StatusCode != 200{
 		panic(err)
 	}
