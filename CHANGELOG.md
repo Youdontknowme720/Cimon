@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## [version 0.5.0] Date 07-23-2025
+
+### Added
+- #5 Jobs and Steps (Github) can now be displayed via wf command
+- Ui is moveable via vim binding
+
 ## [version 0.4.0] Date 07-20-2025
 
 ### Changed
