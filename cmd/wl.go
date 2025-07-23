@@ -2,12 +2,15 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/spf13/cobra"
-	"github.com/Youdontknowme720/Cimon/gitlab"
 	"github.com/Youdontknowme720/Cimon/github"
+	"github.com/Youdontknowme720/Cimon/gitlab"
+	"github.com/spf13/cobra"
 )
-var repoUrl string
-var limit int
+
+var (
+	repoUrl string
+	limit   int
+)
 
 var workflowCmd = &cobra.Command{
 	Use:   "wf",
@@ -31,13 +34,13 @@ var workflowCmd = &cobra.Command{
 		}
 
 		workFlowsResp, err := github.GetWorkflowStatus(repoUrl, limit, token)
-		if err != nil{
+		if err != nil {
 			return fmt.Errorf("Error while fetching workflows")
 		}
 
-		for _, wfr := range workFlowsResp.WorkflowRuns{
+		for _, wfr := range workFlowsResp.WorkflowRuns {
 			jobsRunRes, _ := github.GetJobRuns(repoUrl, wfr.ID, token)
-			for _, job := range jobsRunRes.Jobs{
+			for _, job := range jobsRunRes.Jobs {
 				job.DisplaySteps()
 			}
 			fmt.Println("-----------------------------")
@@ -48,7 +51,7 @@ var workflowCmd = &cobra.Command{
 
 func init() {
 	workflowCmd.Flags().StringVarP(&repoUrl, "repo", "r", "", "Github Repo Url requiered")
-	workflowCmd.Flags().IntVarP(&limit, "limiter", "l", 5, "Limits the output shown for workflows")
+	workflowCmd.Flags().IntVarP(&limit, "limiter", "l", 10, "Limits the output shown for workflows")
 	workflowCmd.Flags().StringP("tokenGithub", "t", "", "GitHub Accesstoken")
 	pipelineCmd.MarkFlagRequired("repo")
 	rootCmd.AddCommand(workflowCmd)
