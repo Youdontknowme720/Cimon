@@ -60,7 +60,7 @@ func GetJobRuns(repo string, workflowID int, token string) (JobRunResponse, erro
 
 func (job Job) DisplaySteps(){
 	for _, step := range job.Steps{
-		if step.Name != "Set up Job" && step.Name != "Complete job"{
+		if step.Name != "Set up job" && step.Name != "Complete job"{
 			fmt.Printf("StepName: %s, Conclusion: %s, Status: %s\n",step.Name, step.Conclusion, step.Status)
 		}
 	}
