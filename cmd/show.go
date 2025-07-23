@@ -2,18 +2,19 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/spf13/cobra"
-	"github.com/Youdontknowme720/Cimon/ui"
-	"github.com/Youdontknowme720/Cimon/gitlab"
 	"github.com/Youdontknowme720/Cimon/github"
+	"github.com/Youdontknowme720/Cimon/gitlab"
+	"github.com/Youdontknowme720/Cimon/ui"
+	"github.com/spf13/cobra"
 )
+
 var repoUrlShow string
 var limitShow int
 
 var ShowCmd = &cobra.Command{
-	Use: "show",
+	Use:   "show",
 	Short: "Shows a tview canvas",
-	RunE: func(cmd *cobra.Command, args []string) error{
+	RunE: func(cmd *cobra.Command, args []string) error {
 		token, err := cmd.Flags().GetString("tokenGithub")
 		if err != nil {
 			return err
@@ -32,7 +33,7 @@ var ShowCmd = &cobra.Command{
 		}
 
 		workFlows, err := github.GetWorkflowStatus(repoUrlShow, limitShow, token)
-		if err != nil{
+		if err != nil {
 			return fmt.Errorf("Error while fetching workflows")
 		}
 		fmt.Println(workFlows)
@@ -41,9 +42,10 @@ var ShowCmd = &cobra.Command{
 	},
 }
 
-func init(){
+func init() {
 	ShowCmd.Flags().StringVarP(&repoUrlShow, "project", "p", "", "GitLab Project ID (required)")
 	ShowCmd.Flags().StringP("tokenGithub", "t", "", "GitLab Private TokenGitlab (optional)")
-	workflowCmd.Flags().IntVarP(&limitShow, "limiterShow", "o", 5, "Limits the output shown for workflows")
+	workflowCmd.Flags().IntVarP(&limitShow, "limiterShow", "o", 10, "Limits the output shown for workflows")
 	rootCmd.AddCommand(ShowCmd)
 }
+

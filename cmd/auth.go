@@ -3,10 +3,10 @@ package cmd
 import (
 	"bufio"
 	"fmt"
+	"github.com/Youdontknowme720/Cimon/gitlab"
+	"github.com/spf13/cobra"
 	"os"
 	"strings"
-	"github.com/spf13/cobra"
-	"github.com/Youdontknowme720/Cimon/gitlab"
 )
 
 var authCmd = &cobra.Command{
@@ -40,7 +40,6 @@ var authCmd = &cobra.Command{
 		return nil
 	},
 }
-
 
 func init() {
 	rootCmd.AddCommand(authCmd)
