@@ -25,7 +25,6 @@ func StartView(workflows github.WorkflowRunsResponse) {
 }
 
 
-
 func buildWorkflowList(workflows github.WorkflowRunsResponse) *tview.List {
 	list := tview.NewList().
 		SetSelectedTextColor(tcell.ColorDarkOrange)
