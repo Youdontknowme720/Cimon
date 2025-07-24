@@ -12,6 +12,6 @@ jobs:
   goodbye:
     runs-on: ubuntu-latest
     steps:
-      - name: Say Goodbye
-        run: echo "Goodbye, World!"
+      - name: Faily
+        run: edcho "Goodbye, World!"
 
