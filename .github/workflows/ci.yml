@@ -8,6 +8,8 @@ jobs:
     steps:
       - name: Say Hello
         run: echo "Hello, World!"
+      - name: Who would win
+        run: Nah I would
 
   goodbye:
     runs-on: ubuntu-latest
