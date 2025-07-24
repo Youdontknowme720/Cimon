@@ -29,7 +29,6 @@ type Step struct {
 func (workflow Workflow) GetJobRuns(repo string, token string) ([]Job, error) {
 	url := fmt.Sprintf("https://api.github.com/repos/%s/actions/runs/%d/jobs", repo, workflow.ID)
 
-	fmt.Printf("Calling: https://api.github.com/repos/%s/actions/runs/%d/jobs\n", repo, workflow.ID)
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return nil, fmt.Errorf("Fehler beim Erstellen der Anfrage: %w", err)

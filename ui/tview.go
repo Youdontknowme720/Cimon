@@ -87,7 +87,6 @@ func buildWorkflowTable(app *tview.Application,
 
 				jobTable := BuildJobTable(jobs)
 				pages.AddAndSwitchToPage("Jobs", jobTable, true)
-
 				jobTable.SetInputCapture(func(ev *tcell.EventKey) *tcell.EventKey{
 					if ev.Rune() == 'b' {
 						pages.SwitchToPage("table")
