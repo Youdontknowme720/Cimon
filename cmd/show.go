@@ -36,8 +36,7 @@ var ShowCmd = &cobra.Command{
 		if err != nil {
 			return fmt.Errorf("Error while fetching workflows")
 		}
-		fmt.Println(workFlows)
-		ui.StartView(workFlows)
+		ui.StartView(workFlows, repoUrlShow, token)
 		return nil
 	},
 }
