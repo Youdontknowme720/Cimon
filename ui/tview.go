@@ -2,8 +2,6 @@ package ui
 
 import (
 	"fmt"
-	"log"
-
 	"github.com/Youdontknowme720/Cimon/github"
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
@@ -18,23 +16,33 @@ type AppState struct{
 
 type WorkflowSelectCallback func(workflow github.Workflow)
 
-func StartView(workflows github.WorkflowRunsResponse, repo string, token string) {
-	app := tview.NewApplication()
-	pages := tview.NewPages()
-
-	workflowTable := buildWorkflowTable(app, workflows, pages, repo, token)
-	pages.AddPage("table", workflowTable, true, true)
-
-	if err := app.SetRoot(pages, true).Run(); err != nil {
-		log.Fatalf("Fehler beim Starten der App: %v", err)
+func StartView(app *tview.Application, repo string, token string) error {
+	workflows, err := github.GetWorkflowStatus(repo, 5, token)
+	if err != nil {
+		return fmt.Errorf("Fehler beim Abrufen der Workflows: %w", err)
 	}
+
+	pages := tview.NewPages()
+	state := &AppState{
+		App:   app,
+		Pages: pages,
+		Repo:  repo,
+		Token: token,
+	}
+
+	ShowWorkflowTable(state, workflows)
+
+	// Start der App
+	if err := app.SetRoot(pages, true).EnableMouse(true).Run(); err != nil {
+		return fmt.Errorf("Fehler beim Starten der App: %w", err)
+	}
+
+	return nil
 }
 
-func buildWorkflowTable(app *tview.Application,
+func ShowWorkflowTable(state *AppState,
 		workflows github.WorkflowRunsResponse,
-		pages *tview.Pages,
-		repo string,
-		token string) *tview.Table {
+		) {
 
 	table := createTable([]string{"#", "Name", "Status"})
 	for i, wf := range workflows.WorkflowRuns {
@@ -58,41 +66,18 @@ func buildWorkflowTable(app *tview.Application,
 			}
 			return nil
 		case 'q':
-			app.Stop()
+			state.App.Stop()
 			return nil
 		}
-		if event.Key() == tcell.KeyEnter {
-			if row > 0 && row-1 < len(workflows.WorkflowRuns) {
-				row_idx, _ := table.GetSelection()
-				selectedWorkflow := workflows.WorkflowRuns[row_idx-1]
-				jobs, err := selectedWorkflow.GetJobRuns(repo, token)
-				if err != nil {
-					modal := tview.NewModal().
-						SetText(fmt.Sprintf("Fehler beim Laden der Jobs:\n\n%v selected workflow %+v", err, selectedWorkflow)).
-						AddButtons([]string{"Zurück"}).
-						SetDoneFunc(func(buttonIndex int, buttonLabel string) {
-							pages.SwitchToPage("table")
-						})
-					pages.AddPage("error", modal, true, true)
-					return nil
-				}
-
-				jobTable := BuildJobTable(jobs)
-				pages.AddAndSwitchToPage("Jobs", jobTable, true)
-				jobTable.SetInputCapture(func(ev *tcell.EventKey) *tcell.EventKey{
-					if ev.Rune() == 'b' {
-						pages.SwitchToPage("table")
-						return nil
-					}
-					return ev
-				})
-			}
+		if event.Key() == tcell.KeyEnter && row > 0 {
+			selected := workflows.WorkflowRuns[row-1]
+			onWorkflowEnter(state, selected)
 			return nil
 		}
 		return event
 	})
 	table.SetTitle(" GitHub Workflows ").SetBorder(true)
-	return table
+	state.Pages.AddAndSwitchToPage("Workflows", table, true)
 }
 
 func statusColor(conclusion string) string {
@@ -108,21 +93,52 @@ func statusColor(conclusion string) string {
 	}
 }
 
-func BuildJobTable(jobs []github.Job) *tview.Table{
+func onWorkflowEnter(state *AppState, workflow github.Workflow) {
+	jobs, err := workflow.GetJobRuns(state.Repo, state.Token)
+	if err != nil {
+		fmt.Sprintf("Fehler beim Laden der Jobs: %v", err)
+		return
+	}
+	ShowJobTable(state, jobs)
+}
+
+func ShowJobTable(state *AppState, jobs []github.Job) {
 	table := createTable([]string{"#", "Name", "Status"})
+
 	for i, job := range jobs {
 		color := statusColor(job.Conclusion)
-		table.SetCell(i+1, 0, tview.NewTableCell(fmt.Sprintf("%-3d", i+1)))
-		table.SetCell(i+1, 1, tview.NewTableCell(fmt.Sprintf("%-10s", job.Name)))
-		table.SetCell(i+1, 2, tview.NewTableCell(fmt.Sprintf("[%-s]%-10s", color, job.Conclusion)))
+		table.SetCell(i+1, 0, tview.NewTableCell(fmt.Sprintf("%d", i+1)))
+		table.SetCell(i+1, 1, tview.NewTableCell(job.Name))
+		table.SetCell(i+1, 2, tview.NewTableCell(fmt.Sprintf("[%s]%s", color, job.Conclusion)))
 	}
 
-	if len(jobs) > 0 {
-		table.Select(1, 0).SetFixed(1, 0).SetSelectable(true, false)
-	}
-
+	table.Select(1, 0).SetFixed(1, 0).SetSelectable(true, false)
 	table.SetTitle(" GitHub Jobs ").SetBorder(true)
-	return table
+
+	table.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
+		row, _ := table.GetSelection()
+		switch event.Rune() {
+		case 'j':
+			if row < table.GetRowCount()-1 {
+				table.Select(row+1, 0)
+			}
+			return nil
+			case 'k':
+				if row > 1 {
+					table.Select(row-1, 0)
+				}
+				return nil
+				case 'b':
+					state.Pages.SwitchToPage("Workflows")
+					return nil
+					case 'q':
+						state.App.Stop()
+						return nil
+		}
+		return event
+	})
+
+	state.Pages.AddAndSwitchToPage("Jobs", table, true)
 }
 
 func createTable(headers []string) *tview.Table {

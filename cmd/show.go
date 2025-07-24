@@ -2,9 +2,9 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/Youdontknowme720/Cimon/github"
 	"github.com/Youdontknowme720/Cimon/gitlab"
 	"github.com/Youdontknowme720/Cimon/ui"
+	"github.com/rivo/tview"
 	"github.com/spf13/cobra"
 )
 
@@ -31,12 +31,11 @@ var ShowCmd = &cobra.Command{
 		if token == "" {
 			return fmt.Errorf("TokenGitlab is empty. Please set it using auth command or as a flag.")
 		}
-
-		workFlows, err := github.GetWorkflowStatus(repoUrlShow, limitShow, token)
+		app := tview.NewApplication()
+		err = ui.StartView(app, repoUrlShow, token)
 		if err != nil {
-			return fmt.Errorf("Error while fetching workflows")
+			return fmt.Errorf("UI failed during loading process: %w", err)
 		}
-		ui.StartView(workFlows, repoUrlShow, token)
 		return nil
 	},
 }
