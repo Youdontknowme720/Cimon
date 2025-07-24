@@ -9,6 +9,13 @@ import (
 	"github.com/rivo/tview"
 )
 
+type AppState struct{
+	App *tview.Application
+	Pages *tview.Pages
+	Token string
+	Repo string
+}
+
 type WorkflowSelectCallback func(workflow github.Workflow)
 
 func StartView(workflows github.WorkflowRunsResponse, repo string, token string) {
@@ -29,22 +36,7 @@ func buildWorkflowTable(app *tview.Application,
 		repo string,
 		token string) *tview.Table {
 
-	table := tview.NewTable()
-	table.SetSelectedStyle(tcell.StyleDefault.
-		Background(tcell.ColorBlue).
-		Foreground(tcell.ColorWhite)).
-		SetSelectable(true, false)
-	table.SetBackgroundColor(tcell.ColorDefault)
-	table.SetBorder(true)
-
-	headers := []string{"#", "Name", "Status"}
-	for i, h := range headers {
-		cell := tview.NewTableCell(fmt.Sprintf("[::b]%s", h)).
-			SetAlign(tview.AlignCenter).
-			SetSelectable(false)
-		table.SetCell(0, i, cell)
-	}
-
+	table := createTable([]string{"#", "Name", "Status"})
 	for i, wf := range workflows.WorkflowRuns {
 		color := statusColor(wf.Conclusion)
 		table.SetCell(i+1, 0, tview.NewTableCell(fmt.Sprintf("%d  ", i+1)))
@@ -117,20 +109,7 @@ func statusColor(conclusion string) string {
 }
 
 func BuildJobTable(jobs []github.Job) *tview.Table{
-	table := tview.NewTable()
-	table.SetSelectedStyle(tcell.StyleDefault.
-		Background(tcell.ColorBlue).
-		Foreground(tcell.ColorWhite)).
-		SetSelectable(true, false)
-	table.SetBackgroundColor(tcell.ColorDefault)
-	table.SetBorder(true)
-	headers := []string{"#", "Name", "Status"}
-	for i, h := range headers {
-		cell := tview.NewTableCell(fmt.Sprintf("[::b]%s", h)).
-			SetAlign(tview.AlignCenter).
-			SetSelectable(false)
-		table.SetCell(0, i, cell)
-	}
+	table := createTable([]string{"#", "Name", "Status"})
 	for i, job := range jobs {
 		color := statusColor(job.Conclusion)
 		table.SetCell(i+1, 0, tview.NewTableCell(fmt.Sprintf("%-3d", i+1)))
@@ -143,5 +122,22 @@ func BuildJobTable(jobs []github.Job) *tview.Table{
 	}
 
 	table.SetTitle(" GitHub Jobs ").SetBorder(true)
+	return table
+}
+
+func createTable(headers []string) *tview.Table {
+	table := tview.NewTable()
+	table.SetSelectedStyle(tcell.StyleDefault.
+		Background(tcell.ColorBlue).
+		Foreground(tcell.ColorWhite)).
+		SetSelectable(true, false)
+	table.SetBackgroundColor(tcell.ColorDefault)
+	table.SetBorder(true)
+	for i, h := range headers {
+		cell := tview.NewTableCell(fmt.Sprintf("[::b]%s", h)).
+			SetAlign(tview.AlignCenter).
+			SetSelectable(false)
+		table.SetCell(0, i, cell)
+	}
 	return table
 }
