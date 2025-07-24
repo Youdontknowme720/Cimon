@@ -8,10 +8,12 @@ jobs:
     steps:
       - name: Say Hello
         run: echo "Hello, World!"
+      - name: Who would win
+        run: echo Nah I would
 
   goodbye:
     runs-on: ubuntu-latest
     steps:
-      - name: Say Goodbye
+      - name: Faily
         run: echo "Goodbye, World!"
 

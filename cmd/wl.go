@@ -39,9 +39,9 @@ var workflowCmd = &cobra.Command{
 		}
 
 		for _, wfr := range workFlowsResp.WorkflowRuns {
-			jobsRunRes, _ := github.GetJobRuns(repoUrl, wfr.ID, token)
-			for _, job := range jobsRunRes.Jobs {
-				job.DisplaySteps()
+			jobs, _ := wfr.GetJobRuns(repoUrl, token)
+			for _, job := range jobs {
+				job.GetSteps()
 			}
 			fmt.Println("-----------------------------")
 		}
