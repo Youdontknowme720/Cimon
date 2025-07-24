@@ -31,7 +31,7 @@ func (workflow Workflow) GetJobRuns(repo string, token string) ([]Job, error) {
 
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
-		return nil, fmt.Errorf("Fehler beim Erstellen der Anfrage: %w", err)
+		return nil, fmt.Errorf("Error during creating request: %w", err)
 	}
 
 	req.Header.Set("Authorization", "Bearer "+token)
@@ -40,32 +40,34 @@ func (workflow Workflow) GetJobRuns(repo string, token string) ([]Job, error) {
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		return nil, fmt.Errorf("Fehler beim Senden der Anfrage: %w", err)
+		return nil, fmt.Errorf("Error during requesting: %w", err)
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != 200 {
 		body, _ := io.ReadAll(resp.Body)
-		return nil, fmt.Errorf("GitHub API Fehler: %s (Status: %d), CallURL: %s", string(body), resp.StatusCode, url)
+		return nil, fmt.Errorf("Api failure: %s (Status: %d), CallURL: %s", string(body), resp.StatusCode, url)
 	}
 
 	var result JobRunResponse
 	err = json.NewDecoder(resp.Body).Decode(&result)
 	if err != nil {
-		return nil, fmt.Errorf("Fehler beim Dekodieren der Antwort: %w", err)
+		return nil, fmt.Errorf("Error while Decoding: %w", err)
 	}
 
 	if result.TotalCount == 0 {
-		fmt.Println("⚠️  Keine Jobs gefunden für diesen Workflow-Run.")
+		fmt.Println("⚠️  Found no jobs for this specific workflow")
 	}
 
 	return result.Jobs, nil
 }
 
-func (job Job) DisplaySteps(){
+func (job Job) GetSteps() ([]Step, error){
+	var steps []Step
 	for _, step := range job.Steps{
 		if step.Name != "Set up job" && step.Name != "Complete job"{
-			fmt.Printf("StepName: %s, Conclusion: %s, Status: %s\n",step.Name, step.Conclusion, step.Status)
+			steps = append(steps, step)
 		}
 	}
+	return steps, nil
 }

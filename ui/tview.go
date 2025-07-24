@@ -123,13 +123,65 @@ func ShowJobTable(state *AppState, jobs []github.Job) {
 				table.Select(row+1, 0)
 			}
 			return nil
+		case 'k':
+			if row > 1 {
+				table.Select(row-1, 0)
+			}
+			return nil
+		case 'b':
+			state.Pages.SwitchToPage("Workflows")
+			return nil
+		case 'q':
+				state.App.Stop()
+				return nil
+		}
+		if event.Key() == tcell.KeyEnter && row > 0 {
+			selected := jobs[row-1]
+			onJobEnter(state, selected)
+			return nil
+		}
+		return event
+	})
+
+	state.Pages.AddAndSwitchToPage("Jobs", table, true)
+}
+
+func onJobEnter(state *AppState, job github.Job){
+	steps, err := job.GetSteps()
+	if err != nil{
+		fmt.Print("Couldnt find any Steps")
+		return
+	}
+	ShowStepTable(state, steps)
+}
+
+func ShowStepTable(state *AppState, steps []github.Step) {
+	table := createTable([]string {"#", "Name", "Status"})
+
+	for i, step := range steps{
+
+		color := statusColor(step.Conclusion)
+		table.SetCell(i+1, 0, tview.NewTableCell(fmt.Sprintf("%d", i+1)))
+		table.SetCell(i+1, 1, tview.NewTableCell(step.Name))
+		table.SetCell(i+1, 2, tview.NewTableCell(fmt.Sprintf("[%s]%s", color, step.Conclusion)))
+	}
+	table.Select(1, 0).SetFixed(1, 0).SetSelectable(true, false)
+	table.SetTitle(" GitHub Jobs ").SetBorder(true)
+	table.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
+		row, _ := table.GetSelection()
+		switch event.Rune() {
+		case 'j':
+			if row < table.GetRowCount()-1 {
+				table.Select(row+1, 0)
+			}
+			return nil
 			case 'k':
 				if row > 1 {
 					table.Select(row-1, 0)
 				}
 				return nil
 				case 'b':
-					state.Pages.SwitchToPage("Workflows")
+					state.Pages.SwitchToPage("Jobs")
 					return nil
 					case 'q':
 						state.App.Stop()
@@ -138,9 +190,8 @@ func ShowJobTable(state *AppState, jobs []github.Job) {
 		return event
 	})
 
-	state.Pages.AddAndSwitchToPage("Jobs", table, true)
+	state.Pages.AddAndSwitchToPage("Steps", table, true)
 }
-
 func createTable(headers []string) *tview.Table {
 	table := tview.NewTable()
 	table.SetSelectedStyle(tcell.StyleDefault.
