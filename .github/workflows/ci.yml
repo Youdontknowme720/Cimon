@@ -9,7 +9,7 @@ jobs:
       - name: Say Hello
         run: echo "Hello, World!"
       - name: Who would win
-        run: Nah I would
+        run: echo Nah I would
 
   goodbye:
     runs-on: ubuntu-latest
