@@ -13,5 +13,5 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Faily
-        run: edcho "Goodbye, World!"
+        run: echo "Goodbye, World!"
 

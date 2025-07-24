@@ -133,9 +133,9 @@ func BuildJobTable(jobs []github.Job) *tview.Table{
 	}
 	for i, job := range jobs {
 		color := statusColor(job.Conclusion)
-		table.SetCell(i+1, 0, tview.NewTableCell(fmt.Sprintf("%d", i+1)).SetAlign(tview.AlignRight))
-		table.SetCell(i+1, 1, tview.NewTableCell(job.Name).SetMaxWidth(30).SetAlign(tview.AlignLeft))
-		table.SetCell(i+1, 2, tview.NewTableCell(fmt.Sprintf("[%s]%s", color, job.Conclusion)))
+		table.SetCell(i+1, 0, tview.NewTableCell(fmt.Sprintf("%-3d", i+1)))
+		table.SetCell(i+1, 1, tview.NewTableCell(fmt.Sprintf("%-10s", job.Name)))
+		table.SetCell(i+1, 2, tview.NewTableCell(fmt.Sprintf("[%-s]%-10s", color, job.Conclusion)))
 	}
 
 	if len(jobs) > 0 {
