@@ -1,10 +1,14 @@
 package github
 
 import (
+	"archive/zip"
+	"bufio"
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
+	"strings"
 )
 
 type JobRunResponse struct {
@@ -24,6 +28,12 @@ type Step struct {
 	Name string `json:"name"`
 	Status string `json:"status"`
 	Conclusion string `json:"conclusion"`
+}
+
+type StepLog struct {
+	Filename string
+	Lines []string
+	Errors []string
 }
 
 func (workflow Workflow) GetJobRuns(repo string, token string) ([]Job, error) {
@@ -70,4 +80,74 @@ func (job Job) GetSteps() ([]Step, error){
 		}
 	}
 	return steps, nil
+}
+
+func GetStepLogs(repo string, token string, workflowID int) ([]StepLog, error){
+	url := fmt.Sprintf("https://api.github.com/repos/%s/actions/runs/%d/logs", repo, workflowID)
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		fmt.Errorf("Error during creating request: %w", err)
+	}
+
+	req.Header.Set("Authorization", "Bearer "+token)
+	req.Header.Set("Accept", "application/vnd.github+json")
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		fmt.Errorf("Error during requesting: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != 200 {
+		body, _ := io.ReadAll(resp.Body)
+		fmt.Errorf("Api failure: %s (Status: %d), CallURL: %s", string(body), resp.StatusCode, url)
+	}
+
+	buf := new(bytes.Buffer)
+	_, err = io.Copy(buf, resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	reader, err := zip.NewReader(bytes.NewReader(buf.Bytes()), int64(buf.Len()))
+	if err != nil {
+		return nil, err
+	}
+
+	// 3. Dateien entpacken und analysieren
+	var logs []StepLog
+	for _, f := range reader.File {
+		if f.FileInfo().IsDir() {
+			continue
+		}
+
+		rc, err := f.Open()
+		if err != nil {
+			continue
+		}
+		defer rc.Close()
+
+		var lines []string
+		var errors []string
+
+		scanner := bufio.NewScanner(rc)
+		for scanner.Scan() {
+			line := scanner.Text()
+			lines = append(lines, line)
+
+			lc := strings.ToLower(line)
+			if strings.Contains(lc, "error") || strings.Contains(lc, "failed") {
+				errors = append(errors, line)
+			}
+		}
+
+		logs = append(logs, StepLog{
+			Filename: f.Name,
+			Lines:    lines,
+			Errors:   errors,
+		})
+	}
+
+	return logs, nil
 }
