@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+## [version 0.6.0] Date 07-24-2025
+
+### Added
+- Steps can now be displayed for different jobs in github
+
 ## [version 0.5.0] Date 07-23-2025
 
 ### Added
