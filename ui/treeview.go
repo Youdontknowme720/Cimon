@@ -14,18 +14,17 @@ type PipelineNode struct {
 	WebUrl string
 }
 
+type JobNode struct{
+	Job utils.Job
+	Name string
+	Status string
+}
+
 func InitTree(app *tview.Application, projectID string, accessToken string) {
 	root := tview.NewTreeNode("root")
 	pipelines, _ := utils.GetPipelineStatus(projectID, accessToken)
 	for _, pipeline := range pipelines{
-		nodeName := fmt.Sprintf("Pipeline: %d", pipeline.ID)
-		node := tview.NewTreeNode(nodeName).
-			SetReference(PipelineNode{pipeline,
-				pipeline.ID,
-				pipeline.Status,
-				pipeline.Created,
-				pipeline.WebURL}).
-			SetSelectable(true)
+		node := buildPipelineNode(pipeline)
 		root.AddChild(node)
 	}
 	tree := tview.NewTreeView().
@@ -35,11 +34,15 @@ func InitTree(app *tview.Application, projectID string, accessToken string) {
 		ref := node.GetReference()
 		if len(node.GetChildren()) == 0{
 			if treeNode, ok := ref.(PipelineNode); ok{
-			failed := treeNode.Pipe.IsFailed()
-			title := fmt.Sprintf("Has failed :%v", failed)
-			newNode := tview.NewTreeNode(title).
-				SetReference("Lel")
-			node.AddChild(newNode)
+				jobs, _ := utils.GetJobDetails(projectID, treeNode.ID, accessToken)
+				for _, job := range jobs{
+					nodeName := fmt.Sprintf("Job %s", job.Name)
+					newNode := tview.NewTreeNode(nodeName).
+						SetReference(JobNode{job,
+							job.Name,
+							job.Status})
+					node.AddChild(newNode)
+				}
 		}
 		}
 	})
@@ -48,3 +51,14 @@ func InitTree(app *tview.Application, projectID string, accessToken string) {
 	app.Run()
 }
 
+func buildPipelineNode(pipe utils.Pipeline) *tview.TreeNode{
+	nodeName := fmt.Sprintf("Pipeline: %d", pipe.ID)
+	node := tview.NewTreeNode(nodeName).
+		SetReference(PipelineNode{pipe,
+			pipe.ID,
+			pipe.Status,
+			pipe.Created,
+			pipe.WebURL}).
+		SetSelectable(true)
+	return node
+}
