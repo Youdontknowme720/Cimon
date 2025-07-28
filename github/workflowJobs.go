@@ -82,7 +82,7 @@ func (job Job) GetSteps() ([]Step, error){
 	return steps, nil
 }
 
-func GetStepLogs(repo string, token string, workflowID int) ([]StepLog, error){
+func GetStepLogs(repo string, token string, workflowID int, stepName string) ([]StepLog, error){
 	url := fmt.Sprintf("https://api.github.com/repos/%s/actions/runs/%d/logs", repo, workflowID)
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
@@ -115,7 +115,6 @@ func GetStepLogs(repo string, token string, workflowID int) ([]StepLog, error){
 		return nil, err
 	}
 
-	// 3. Dateien entpacken und analysieren
 	var logs []StepLog
 	for _, f := range reader.File {
 		if f.FileInfo().IsDir() {

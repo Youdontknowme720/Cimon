@@ -116,7 +116,8 @@ func ShowJobTable(state *AppState, jobs []github.Job, workflowID int) {
 	}
 
 	table.Select(1, 0).SetFixed(1, 0).SetSelectable(true, false)
-	table.SetTitle(" GitHub Jobs ").SetBorder(true)
+	title := fmt.Sprintf("Jobs for Workflow: %d", workflowID)
+	table.SetTitle(title).SetBorder(true)
 
 	table.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
 		row, _ := table.GetSelection()
@@ -169,7 +170,8 @@ func ShowStepTable(state *AppState, steps []github.Step, job github.Job, workflo
 		table.SetCell(i+1, 2, tview.NewTableCell(fmt.Sprintf("[%s]%s", color, step.Conclusion)))
 	}
 	table.Select(1, 0).SetFixed(1, 0).SetSelectable(true, false)
-	table.SetTitle(" GitHub Jobs ").SetBorder(true)
+	title := fmt.Sprintf("Steps for Job: %s", job.Name)
+	table.SetTitle(title).SetBorder(true)
 	table.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
 		row, _ := table.GetSelection()
 		switch event.Rune() {
@@ -192,7 +194,9 @@ func ShowStepTable(state *AppState, steps []github.Step, job github.Job, workflo
 
 		}
 		if event.Key() == tcell.KeyEnter && row > 0 {
-			onStepEnter(state, workflowID)
+			stepNameCell := table.GetCell(row, 1)
+			stepName := stepNameCell.Text
+			onStepEnter(state, workflowID, stepName)
 			return nil
 		}
 		return event
@@ -201,8 +205,8 @@ func ShowStepTable(state *AppState, steps []github.Step, job github.Job, workflo
 	state.Pages.AddAndSwitchToPage("Steps", table, true)
 }
 
-func onStepEnter(state *AppState, workflowID int){
-	logs, err := github.GetStepLogs(state.Repo, state.Token, workflowID)
+func onStepEnter(state *AppState, workflowID int, stepName string){
+	logs, err := github.GetStepLogs(state.Repo, state.Token, workflowID, stepName)
 	if err != nil{
 		_ = fmt.Errorf("Couldnt fetch Step-Logs")
 	}
