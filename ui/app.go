@@ -170,6 +170,11 @@ func (a *App) handleAddingProject() {
 			return
 		}
 		config.AddNewProject(id, name)
+		a.pages.RemovePage("home")
+		_, projects := config.GetProjectData()
+		a.gitlabProjects = projects
+		home := a.createHomeScreen(a.gitlabProjects)
+		a.pages.AddPage("home", home, true, true)
 		a.pages.SwitchToPage("home")
 	}
 
