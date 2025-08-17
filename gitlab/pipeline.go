@@ -10,6 +10,8 @@ import (
 type Pipeline struct {
 	ID      int    `json:"id"`
 	Status  string `json:"status"`
+	Ref     string `json:"ref"`
+	Sha     string `json:"sha"`
 	Created string `json:"created_at"`
 	WebURL  string `json:"web_url"`
 }

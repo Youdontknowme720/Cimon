@@ -51,7 +51,6 @@ func (a *App) handleAddingProject() {
 	form.SetFieldTextColor(tcell.ColorBlack)
 	form.SetBorder(true).SetTitle("Editing ...").SetTitleAlign(tview.AlignCenter)
 
-	// Übersicht existierender Projekte
 	configOverviewTable := tview.NewTable()
 	_, activeProjects := config.GetProjectData()
 	for idx, project := range activeProjects {
@@ -64,7 +63,6 @@ func (a *App) handleAddingProject() {
 		SetTitleAlign(tview.AlignCenter).
 		SetBorder(true)
 
-	// Save / Abort Funktionen
 	saveFunc := func() {
 		name := form.GetFormItemByLabel("ProjectName").(*tview.InputField).GetText()
 		idStr := form.GetFormItemByLabel("ProjectID").(*tview.InputField).GetText()
