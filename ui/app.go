@@ -161,6 +161,24 @@ func (a *App) handleAddingProject() {
 		AddInputField("ProjectName", "Enter ProjectName", 20, nil, nil)
 
 	form.SetFieldTextColor(tcell.ColorBlack)
+	form.SetBorder(true).SetTitle("Editing ...").SetTitleAlign(tview.AlignCenter)
+
+	configOverviewTable := tview.NewTable()
+	_, activeProjects := config.GetProjectData()
+	for idx, project := range activeProjects {
+		cellProjectName := tview.NewTableCell(project.Name).
+			SetAlign(tview.AlignLeft).
+			SetSelectable(false)
+		cellProjectID := tview.NewTableCell(fmt.Sprint(project.ID)).
+			SetAlign(tview.AlignLeft).
+			SetSelectable(false)
+
+		configOverviewTable.SetCell(idx, 0, cellProjectID)
+		configOverviewTable.SetCell(idx, 1, cellProjectName)
+	}
+	configOverviewTable.SetTitle("Current projects definied in config")
+	configOverviewTable.SetTitleAlign(tview.AlignCenter)
+	configOverviewTable.SetBorder(true)
 
 	saveFunc := func() {
 		name := form.GetFormItemByLabel("ProjectName").(*tview.InputField).GetText()
@@ -187,18 +205,20 @@ func (a *App) handleAddingProject() {
 
 	form.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
 		switch {
-		case event.Key() == tcell.KeyCtrlS: // Ctrl+S speichert
+		case event.Key() == tcell.KeyCtrlS:
 			saveFunc()
 			return nil
-		case event.Key() == tcell.KeyCtrlC || event.Key() == tcell.KeyEsc: // Ctrl+C oder Esc bricht ab
+		case event.Key() == tcell.KeyCtrlB || event.Key() == tcell.KeyEsc:
 			abortFunc()
 			return nil
 		}
 		return event
 	})
 
-	form.SetBorder(true).SetTitle("Adding new Project").SetTitleAlign(tview.AlignLeft)
-	a.pages.AddPage("addProject", form, true, true)
+	flex := tview.NewFlex().
+		AddItem(form, 0, 1, true).
+		AddItem(configOverviewTable, 0, 1, false)
+	a.pages.AddPage("addProject", flex, true, true)
 	a.pages.SwitchToPage("addProject")
 }
 
