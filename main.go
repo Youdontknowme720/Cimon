@@ -1,7 +1,17 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
 
-func main(){
-	fmt.Println("Hello World")
+	"github.com/Youdontknowme720/Cimonv2/ui"
+)
+
+func main() {
+	fmt.Print("Start App")
+	myApp := ui.NewApp()
+	myApp.Setup()
+	err := myApp.Run()
+	if err != nil {
+		return
+	}
 }
