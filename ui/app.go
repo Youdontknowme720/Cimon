@@ -157,10 +157,12 @@ func (a *App) createSettingsPage() tview.Primitive {
 
 func (a *App) handleAddingProject() {
 	form := tview.NewForm().
-		AddInputField("ProjectID", "", 20, nil, nil).
-		AddInputField("ProjectName", "", 20, nil, nil)
+		AddInputField("ProjectID", "Enter ProjectID", 20, nil, nil).
+		AddInputField("ProjectName", "Enter ProjectName", 20, nil, nil)
 
-	form.AddButton("Save", func() {
+	form.SetFieldTextColor(tcell.ColorBlack)
+
+	saveFunc := func() {
 		name := form.GetFormItemByLabel("ProjectName").(*tview.InputField).GetText()
 		idStr := form.GetFormItemByLabel("ProjectID").(*tview.InputField).GetText()
 		id, err := strconv.Atoi(idStr)
@@ -168,12 +170,28 @@ func (a *App) handleAddingProject() {
 			return
 		}
 		config.AddNewProject(id, name)
+		a.pages.SwitchToPage("home")
+	}
 
+	abortFunc := func() {
 		a.pages.SwitchToPage("home")
+	}
+
+	form.AddButton("Save", saveFunc)
+	form.AddButton("Abort", abortFunc)
+
+	form.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
+		switch {
+		case event.Key() == tcell.KeyCtrlS: // Ctrl+S speichert
+			saveFunc()
+			return nil
+		case event.Key() == tcell.KeyCtrlC || event.Key() == tcell.KeyEsc: // Ctrl+C oder Esc bricht ab
+			abortFunc()
+			return nil
+		}
+		return event
 	})
-	form.AddButton("Abbort", func() {
-		a.pages.SwitchToPage("home")
-	})
+
 	form.SetBorder(true).SetTitle("Adding new Project").SetTitleAlign(tview.AlignLeft)
 	a.pages.AddPage("addProject", form, true, true)
 	a.pages.SwitchToPage("addProject")
