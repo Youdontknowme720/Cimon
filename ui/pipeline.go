@@ -18,7 +18,25 @@ func (a *App) createPipelinePage(proj config.GitLabProject) tview.Primitive {
 		}
 		return event
 	})
+	tree.SetSelectedFunc(func(node *tview.TreeNode) {
+		a.handlePipelineSelected(node, proj.ID)
+	})
 	return tree
+}
+
+func (a *App) handlePipelineSelected(node *tview.TreeNode, projectID int) {
+	ref := node.GetReference()
+
+	if ref == nil {
+		return
+	}
+
+	switch v := ref.(type) {
+	case gitlab.Pipeline:
+		page := a.createJobPage(projectID, v.ID)
+		a.pages.AddPage("JobPage", page, true, true)
+		a.pages.SwitchToPage("JobPage")
+	}
 }
 
 func (a *App) handlePipelineClick(projectID string) *tview.TreeView {
