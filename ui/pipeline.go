@@ -45,14 +45,17 @@ func (a *App) handlePipelineClick(projectID string) *tview.TreeView {
 		panic(err)
 	}
 	root := tview.NewTreeNode("Pipelines").
-		SetColor(tcell.ColorGreen)
+		SetColor(tcell.ColorDarkOrange)
 
 	for _, p := range pipelines {
 		commitMessage, err := gitlab.GetCommit(projectID, p.Sha, a.token)
 		if err != nil {
 			panic(err)
 		}
-		pipelineNode := tview.NewTreeNode(p.Ref + " " + commitMessage.Message + " " + p.Status).
+
+		statusText := gitlab.StatusEmoji(p.Status)
+
+		pipelineNode := tview.NewTreeNode(statusText + " " + commitMessage.Message).
 			SetReference(p).
 			SetSelectable(true)
 		root.AddChild(pipelineNode)

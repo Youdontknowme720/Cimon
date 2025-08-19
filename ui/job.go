@@ -12,7 +12,7 @@ func (a *App) createJobPage(projectID int, pipelineID int) tview.Primitive {
 	tree := a.handleJobClick(fmt.Sprint(projectID), pipelineID)
 	tree.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
 		if event.Key() == tcell.KeyRune && event.Rune() == 'b' {
-			a.pages.SwitchToPage(PageHome)
+			a.pages.SwitchToPage(PagePipeline)
 			return nil
 		}
 		return event

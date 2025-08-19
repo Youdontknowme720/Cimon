@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-func statusEmoji(status string) string {
+func StatusEmoji(status string) string {
 	switch status {
 	case "success":
 		return "✅"
