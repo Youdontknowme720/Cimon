@@ -22,7 +22,7 @@ func (a *App) createJobPage(projectID int, pipelineID int) tview.Primitive {
 
 func (a *App) handleJobClick(projectID string, pipelineID int) *tview.TreeView {
 	jobs, err := gitlab.GetJobDetails(projectID, pipelineID, a.token)
-	root := tview.NewTreeNode("Jobs").SetColor(tcell.ColorGreen)
+	root := tview.NewTreeNode("Jobs").SetColor(tcell.ColorDarkOrange)
 
 	if err != nil {
 		root.SetText(fmt.Sprintf("Fehler: %v", err))
@@ -30,8 +30,8 @@ func (a *App) handleJobClick(projectID string, pipelineID int) *tview.TreeView {
 	}
 
 	for _, j := range jobs {
-		text := fmt.Sprintf("%s (%s)", j.Name, j.Stage)
-		jobNode := tview.NewTreeNode(text).
+		statusText := gitlab.StatusEmoji(j.Status)
+		jobNode := tview.NewTreeNode(statusText + " " + j.Name).
 			SetReference(j).
 			SetSelectable(true)
 		root.AddChild(jobNode)
