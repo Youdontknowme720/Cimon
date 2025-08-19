@@ -37,10 +37,47 @@ func (a *App) createSettingsPage() tview.Primitive {
 				fmt.Println("Deleting project...")
 			case "Conf":
 				fmt.Println("Configuring project...")
+			case "Tok":
+				a.handleAddingToken()
 			}
 		}
 	})
 	return table
+}
+
+func (a *App) handleAddingToken() {
+	form := tview.NewForm().
+		AddInputField("Token", "", 20, nil, nil)
+	form.SetFieldTextColor(tcell.ColorBlack)
+	form.SetBorder(true).SetTitle("Editing ...").SetTitleAlign(tview.AlignCenter)
+
+	saveFunc := func() {
+		newToken := form.GetFormItemByLabel("Token").(*tview.InputField).GetText()
+		config.AddNewToken(newToken)
+		a.token = newToken
+		a.pages.SwitchToPage(PageHome)
+	}
+
+	abortFunc := func() {
+		a.pages.SwitchToPage(PageHome)
+	}
+
+	form.AddButton("Save", saveFunc)
+	form.AddButton("Abort", abortFunc)
+
+	form.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
+		switch {
+		case event.Key() == tcell.KeyCtrlS:
+			saveFunc()
+			return nil
+		case event.Key() == tcell.KeyCtrlB || event.Key() == tcell.KeyEsc:
+			abortFunc()
+			return nil
+		}
+		return event
+	})
+	a.pages.AddPage(PageAddToken, form, true, true)
+	a.pages.SwitchToPage(PageAddToken)
 }
 
 func (a *App) handleAddingProject() {
@@ -110,6 +147,7 @@ func (a *App) handleSettingsClick() *tview.Table {
 		"Add new project":   "Add",
 		"Delete project":    "Del",
 		"Configure project": "Conf",
+		"Add new Token":     "Tok",
 	}
 	table := newSelectableTable()
 	cnt := 0

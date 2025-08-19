@@ -12,6 +12,7 @@ const (
 	PageSettings = "settings"
 	PagePipeline = "pipelines"
 	PageAddProj  = "addProject"
+	PageAddToken = "addToken"
 )
 
 type App struct {

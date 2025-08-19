@@ -55,3 +55,18 @@ func AddNewProject(projectID int, projectName string) {
 		panic(err)
 	}
 }
+
+func AddNewToken(token string) {
+	cfgData := ReadConfig()
+	cfgData.Token = token
+
+	newData, err := yaml.Marshal(cfgData)
+	if err != nil {
+		panic(err)
+	}
+
+	err = os.WriteFile("config/config.yml", newData, 0644)
+	if err != nil {
+		panic(err)
+	}
+}
