@@ -8,12 +8,12 @@ import (
 )
 
 type Pipeline struct {
-	ID      int    `json:"id"`
-	Status  string `json:"status"`
-	Ref     string `json:"ref"`
-	Sha     string `json:"sha"`
-	Created string `json:"created_at"`
-	WebURL  string `json:"web_url"`
+	ID        int    `json:"id"`
+	Status    string `json:"status"`
+	Ref       string `json:"ref"`
+	Sha       string `json:"sha"`
+	WebURL    string `json:"web_url"`
+	CreatedAt string `json:"created_at"`
 }
 
 const baseURL = "https://gitlab.com/api/v4"
