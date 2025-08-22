@@ -9,8 +9,11 @@ import (
 	"github.com/rivo/tview"
 )
 
-// Farbschema definieren
 var (
+	ColorBlue      = tcell.NewRGBColor(13, 17, 100)
+	ColorPurple    = tcell.NewRGBColor(100, 13, 95)
+	ColorPink      = tcell.NewRGBColor(234, 34, 100)
+	ColorOrange    = tcell.NewRGBColor(247, 141, 96)
 	ColorPrimary   = tcell.ColorDodgerBlue
 	ColorSecondary = tcell.ColorDarkCyan
 	ColorAccent    = tcell.ColorGold
@@ -18,24 +21,19 @@ var (
 	ColorWarning   = tcell.ColorOrange
 	ColorDanger    = tcell.ColorRed
 	ColorText      = tcell.ColorWhite
-	ColorBorder    = tcell.ColorSteelBlue
+	ColorBorder    = tcell.NewRGBColor(234, 34, 100)
 	ColorSelected  = tcell.ColorLightSkyBlue
 )
 
 func (a *App) createHomeScreen(projects []config.GitLabProject) *tview.Flex {
-	// Hauptcontainer mit Border und Titel
 	mainContainer := tview.NewFlex().SetDirection(tview.FlexRow)
 
-	// Header mit Titel und Info
 	header := a.createHeader()
 
-	// Projekt-Tabelle erstellen
 	table := a.createStyledProjectTable(projects)
 
-	// Footer mit Hilfetext
 	footer := a.createFooter()
 
-	// Alles zusammenfügen
 	mainContainer.
 		AddItem(header, 3, 0, false).
 		AddItem(table, 0, 1, true).
@@ -46,16 +44,16 @@ func (a *App) createHomeScreen(projects []config.GitLabProject) *tview.Flex {
 
 func (a *App) createHeader() *tview.TextView {
 	header := tview.NewTextView().
-		SetText("🚀 [::bu]CIMON v2[::-] - GitLab Pipeline Monitor\n[::d]Wählen Sie ein Projekt oder Settings aus[::-]").
+		SetText("🚀 CIMON v2 - GitLab Pipeline Monitor\n Wählen Sie ein Projekt oder Settings aus").
 		SetTextAlign(tview.AlignCenter).
-		SetDynamicColors(true).
 		SetRegions(true)
 
+	header.SetBackgroundColor(ColorBlue)
 	header.SetBorder(true).
-		SetBorderColor(ColorPrimary).
+		SetBorderColor(ColorOrange).
 		SetTitle(" Welcome ").
 		SetTitleAlign(tview.AlignCenter).
-		SetTitleColor(ColorAccent)
+		SetTitleColor(ColorPink)
 
 	return header
 }
@@ -63,21 +61,18 @@ func (a *App) createHeader() *tview.TextView {
 func (a *App) createStyledProjectTable(projects []config.GitLabProject) *tview.Table {
 	table := newSelectableTable()
 
-	// Tabellen-Styling
 	table.SetBorder(true).
-		SetBorderColor(ColorBorder).
-		SetTitle(" 📁 Projekte ").
-		SetTitleAlign(tview.AlignLeft).
-		SetTitleColor(ColorPrimary)
+		SetBorderColor(ColorOrange).
+		SetTitle(" HOME ").
+		SetTitleAlign(tview.AlignCenter).
+		SetTitleColor(ColorPurple)
 
-	// Tabellen-Eigenschaften
 	table.SetSelectable(true, false).
 		SetSelectedStyle(tcell.StyleDefault.
 			Background(ColorSelected).
 			Foreground(tcell.ColorBlack).
 			Bold(true))
 
-	// Settings-Zeile mit Icon und Styling
 	settingsCell := tview.NewTableCell(" ⚙️  Settings").
 		SetAlign(tview.AlignLeft).
 		SetSelectable(true).
