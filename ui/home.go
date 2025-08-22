@@ -35,16 +35,16 @@ func (a *App) createHomeScreen(projects []config.GitLabProject) *tview.Flex {
 	footer := a.createFooter()
 
 	mainContainer.
-		AddItem(header, 3, 0, false).
+		AddItem(header, 5, 0, false).
 		AddItem(table, 0, 1, true).
-		AddItem(footer, 2, 0, false)
+		AddItem(footer, 5, 0, false)
 
 	return mainContainer
 }
 
 func (a *App) createHeader() *tview.TextView {
 	header := tview.NewTextView().
-		SetText("🚀 CIMON v2 - GitLab Pipeline Monitor\n Wählen Sie ein Projekt oder Settings aus").
+		SetText("🚀 CIMON v2 - GitLab Pipeline Monitor\n Choose a project or add a new one within the settings").
 		SetTextAlign(tview.AlignCenter).
 		SetRegions(true)
 
@@ -87,6 +87,7 @@ func (a *App) createStyledProjectTable(projects []config.GitLabProject) *tview.T
 		SetAlign(tview.AlignLeft).
 		SetSelectable(false)
 	table.SetCell(1, 0, separatorCell)
+	table.SetCell(2, 0, separatorCell)
 
 	for i, project := range projects {
 		icon := a.getProjectIcon(project)
@@ -98,7 +99,7 @@ func (a *App) createStyledProjectTable(projects []config.GitLabProject) *tview.T
 			SetReference(project).
 			SetTextColor(ColorText)
 
-		table.SetCell(i+2, 0, cell)
+		table.SetCell(2*i+3, 0, cell)
 	}
 
 	table.SetSelectedFunc(func(row, column int) {
