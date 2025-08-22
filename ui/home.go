@@ -17,9 +17,9 @@ var (
 	ColorPrimary   = tcell.ColorDodgerBlue
 	ColorSecondary = tcell.ColorDarkCyan
 	ColorAccent    = tcell.ColorGold
-	ColorSuccess   = tcell.ColorGreen
+	ColorSuccess   = tcell.ColorDarkGreen
 	ColorWarning   = tcell.ColorOrange
-	ColorDanger    = tcell.ColorRed
+	ColorDanger    = tcell.ColorDarkRed
 	ColorText      = tcell.ColorWhite
 	ColorBorder    = tcell.NewRGBColor(234, 34, 100)
 	ColorSelected  = tcell.ColorLightSkyBlue

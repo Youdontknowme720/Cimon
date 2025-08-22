@@ -47,7 +47,7 @@ func (a *App) createPipelinePage(proj config.GitLabProject) tview.Primitive {
 	})
 
 	container.
-		AddItem(header, 4, 0, false).
+		AddItem(header, 5, 0, false).
 		AddItem(tree, 0, 1, true).
 		AddItem(footer, 2, 0, false)
 
@@ -56,12 +56,13 @@ func (a *App) createPipelinePage(proj config.GitLabProject) tview.Primitive {
 
 func (a *App) createPipelineHeader(proj config.GitLabProject) *tview.TextView {
 	header := tview.NewTextView().
-		SetDynamicColors(true).
 		SetRegions(true).
 		SetTextAlign(tview.AlignCenter)
 
+	header.SetBackgroundColor(ColorBlue)
+
 	headerText := fmt.Sprintf(
-		"🔧 [::bu]%s[::-] - Pipeline Overview\n[::d]Projekt-ID: %d | Letzte Aktualisierung: %s[::-]",
+		"🔧 [::bu]%s[::-] - Pipeline Overview\n[::d]Projekt-ID: %d | Last updated: %s[::-]",
 		proj.Name,
 		proj.ID,
 		time.Now().Format("15:04:05"),
@@ -70,17 +71,17 @@ func (a *App) createPipelineHeader(proj config.GitLabProject) *tview.TextView {
 	header.SetText(headerText)
 
 	header.SetBorder(true)
-	header.SetBorderColor(ColorPrimary)
+	header.SetBorderColor(ColorOrange)
 	header.SetTitle(" 🚀 Pipeline Status ")
 	header.SetTitleAlign(tview.AlignCenter)
-	header.SetTitleColor(ColorAccent)
+	header.SetTitleColor(ColorPink)
 
 	return header
 }
 
 func (a *App) createPipelineFooter() *tview.TextView {
 	footer := tview.NewTextView().
-		SetText("[::b]Navigation:[::-] [yellow]↑/↓[::-] Auswählen | [yellow]Enter[::-] Jobs anzeigen | [yellow]B[::-] Zurück | [yellow]R[::-] Aktualisieren | [yellow]Esc[::-] Home").
+		SetText("Navigation:[::-] ↑/↓ Auswählen | Enter show jobs | B back | R[::-] update | Esc[::-] back to home").
 		SetTextAlign(tview.AlignCenter).
 		SetDynamicColors(true).
 		SetRegions(true)
@@ -96,10 +97,10 @@ func (a *App) createPipelineFooter() *tview.TextView {
 
 func (a *App) stylePipelineTree(tree *tview.TreeView, proj config.GitLabProject) {
 	tree.SetBorder(true)
-	tree.SetBorderColor(ColorBorder)
+	tree.SetBorderColor(ColorOrange)
 	tree.SetTitle(fmt.Sprintf(" 📋 Pipelines für %s ", proj.Name))
 	tree.SetTitleAlign(tview.AlignLeft)
-	tree.SetTitleColor(ColorPrimary)
+	tree.SetTitleColor(ColorPink)
 
 	tree.SetGraphics(true)
 	tree.SetTopLevel(1)
@@ -124,7 +125,6 @@ func (a *App) handlePipelineSelected(node *tview.TreeNode, projectID int) {
 }
 
 func (a *App) handlePipelineClick(projectID string) *tview.TreeView {
-	// Loading-Anzeige während des Ladens
 	loadingNode := tview.NewTreeNode("⏳ Lade Pipelines...").
 		SetColor(ColorPrimary).
 		SetSelectable(false)
@@ -133,7 +133,24 @@ func (a *App) handlePipelineClick(projectID string) *tview.TreeView {
 		SetRoot(loadingNode).
 		SetCurrentNode(loadingNode)
 
-	pipelines, err := gitlab.GetAllPipelines(projectID, a.token, 3)
+	tree.SetBackgroundColor(ColorBlue)
+
+	var lastSelected *tview.TreeNode
+
+	tree.SetChangedFunc(func(node *tview.TreeNode) {
+		if lastSelected != nil {
+			if pipeline, ok := lastSelected.GetReference().(gitlab.Pipeline); ok {
+				lastSelected.SetColor(a.getStatusColor(pipeline.Status))
+			}
+		}
+
+		if node != nil && node.GetReference() != nil {
+			node.SetColor(tcell.ColorYellow) // oder ColorSuccess, ColorPink, etc.
+			lastSelected = node
+		}
+	})
+
+	pipelines, err := gitlab.GetAllPipelines(projectID, a.token, 5)
 	if err != nil {
 		errorNode := tview.NewTreeNode("❌ Fehler beim Laden der Pipelines: " + err.Error()).
 			SetColor(ColorDanger).
@@ -143,12 +160,12 @@ func (a *App) handlePipelineClick(projectID string) *tview.TreeView {
 	}
 
 	root := tview.NewTreeNode("🔧 Pipelines (" + fmt.Sprint(len(pipelines)) + ")").
-		SetColor(ColorPrimary).
+		SetColor(ColorPink).
 		SetExpanded(true).
 		SetSelectable(false)
 
-	for i, p := range pipelines {
-		pipelineNode := a.createPipelineNode(projectID, p, i+1)
+	for _, p := range pipelines {
+		pipelineNode := a.createPipelineNode(projectID, p)
 		root.AddChild(pipelineNode)
 	}
 
@@ -162,10 +179,10 @@ func (a *App) handlePipelineClick(projectID string) *tview.TreeView {
 	return tree
 }
 
-func (a *App) createPipelineNode(projectID string, pipeline gitlab.Pipeline, index int) *tview.TreeNode {
+func (a *App) createPipelineNode(projectID string, pipeline gitlab.Pipeline) *tview.TreeNode {
 	commitMessage, err := gitlab.GetCommit(projectID, pipeline.Sha, a.token)
 	if err != nil {
-		commitMessage = &gitlab.Commit{Message: "Unbekannte Commit-Nachricht"}
+		commitMessage = &gitlab.Commit{Message: "Unknown commit message"}
 	}
 
 	statusEmoji := gitlab.StatusEmoji(pipeline.Status)
@@ -176,14 +193,14 @@ func (a *App) createPipelineNode(projectID string, pipeline gitlab.Pipeline, ind
 		message = message[:57] + "..."
 	}
 
-	nodeText := fmt.Sprintf("%s Pipeline #%d: %s",
+	nodeText := fmt.Sprintf("[white:#0d1164]%s Pipeline #%d: %s[-:-:-]",
 		statusEmoji,
 		pipeline.ID,
 		strings.TrimSpace(message))
 
 	if len(pipeline.Sha) >= 8 {
 		shortSha := pipeline.Sha[:8]
-		nodeText += fmt.Sprintf(" [gray](%s)[white]", shortSha)
+		nodeText += fmt.Sprintf("[gray:#0d1164](%s)[-:-:-]", shortSha)
 	}
 
 	pipelineNode := tview.NewTreeNode(nodeText).
