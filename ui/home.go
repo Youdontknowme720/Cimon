@@ -123,24 +123,22 @@ func (a *App) createFooter() *tview.TextView {
 	footer := tview.NewTextView().
 		SetText("Tastenkürzel:↑/↓ Navigation | Enter[::-] Auswählen Esc[::-] Beenden Ctrl+R[::-] Aktualisieren").
 		SetTextAlign(tview.AlignCenter).
-		SetDynamicColors(true).
 		SetRegions(true)
 
+	footer.SetBackgroundColor(ColorBlue)
+
 	footer.SetBorder(true).
-		SetBorderColor(ColorSecondary).
+		SetBorderColor(ColorOrange).
 		SetTitle(" Hilfe ").
 		SetTitleAlign(tview.AlignCenter).
-		SetTitleColor(ColorAccent)
+		SetTitleColor(ColorPink)
 
 	return footer
 }
 
 func (a *App) getProjectIcon(project config.GitLabProject) string {
-	// Basierend auf Projektname oder anderen Eigenschaften
-	// können Sie verschiedene Icons zurückgeben
 	icons := []string{"🔧", "🏗️", "📦", "🌐", "🔬", "📱", "💻", "⚡"}
 
-	// Einfache Hash-basierte Icon-Auswahl
 	hash := 0
 	for _, char := range project.Name {
 		hash += int(char)
