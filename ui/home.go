@@ -65,31 +65,29 @@ func (a *App) createStyledProjectTable(projects []config.GitLabProject) *tview.T
 		SetBorderColor(ColorOrange).
 		SetTitle(" HOME ").
 		SetTitleAlign(tview.AlignCenter).
-		SetTitleColor(ColorPurple)
+		SetTitleColor(ColorPink).
+		SetBackgroundColor(ColorBlue)
 
 	table.SetSelectable(true, false).
 		SetSelectedStyle(tcell.StyleDefault.
-			Background(ColorSelected).
-			Foreground(tcell.ColorBlack).
+			Background(ColorBlue).
+			Foreground(ColorPink).
 			Bold(true))
 
 	settingsCell := tview.NewTableCell(" ⚙️  Settings").
 		SetAlign(tview.AlignLeft).
 		SetSelectable(true).
 		SetReference("Settings").
-		SetTextColor(ColorAccent).
-		SetBackgroundColor(tcell.ColorDefault)
+		SetTextColor(tcell.ColorWhite).
+		SetBackgroundColor(ColorBlue)
 
 	table.SetCell(0, 0, settingsCell)
 
-	// Separator-Zeile
-	separatorCell := tview.NewTableCell("─────────────────────").
+	separatorCell := tview.NewTableCell("").
 		SetAlign(tview.AlignLeft).
-		SetSelectable(false).
-		SetTextColor(ColorBorder)
+		SetSelectable(false)
 	table.SetCell(1, 0, separatorCell)
 
-	// Projekt-Zeilen mit Icons und Farben
 	for i, project := range projects {
 		icon := a.getProjectIcon(project)
 		cellText := fmt.Sprintf(" %s  %s", icon, project.Name)
@@ -103,19 +101,16 @@ func (a *App) createStyledProjectTable(projects []config.GitLabProject) *tview.T
 		table.SetCell(i+2, 0, cell)
 	}
 
-	// Selection Handler
 	table.SetSelectedFunc(func(row, column int) {
 		a.handleHomeSelected(row, column, table)
 	})
 
-	// Input Handler für zusätzliche Tastenkürzel
 	table.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
 		switch event.Key() {
 		case tcell.KeyEsc:
 			a.app.Stop()
 			return nil
 		case tcell.KeyCtrlR:
-			// Refresh-Funktion hier implementieren
 			return nil
 		}
 		return event
@@ -126,7 +121,7 @@ func (a *App) createStyledProjectTable(projects []config.GitLabProject) *tview.T
 
 func (a *App) createFooter() *tview.TextView {
 	footer := tview.NewTextView().
-		SetText("[::b]Tastenkürzel:[::-] [yellow]↑/↓[::-] Navigation | [yellow]Enter[::-] Auswählen | [yellow]Esc[::-] Beenden | [yellow]Ctrl+R[::-] Aktualisieren").
+		SetText("Tastenkürzel:↑/↓ Navigation | Enter[::-] Auswählen Esc[::-] Beenden Ctrl+R[::-] Aktualisieren").
 		SetTextAlign(tview.AlignCenter).
 		SetDynamicColors(true).
 		SetRegions(true)
@@ -183,9 +178,7 @@ func (a *App) handleHomeSelected(row, column int, table *tview.Table) {
 	}
 }
 
-// Hilfsfunktion für Benachrichtigungen
 func (a *App) showNotification(message string, color tcell.Color) {
-	// Modal für kurze Benachrichtigungen
 	modal := tview.NewModal().
 		SetText(message).
 		SetTextColor(color).
@@ -196,29 +189,10 @@ func (a *App) showNotification(message string, color tcell.Color) {
 
 	a.pages.AddPage("notification", modal, false, true)
 
-	// Auto-Hide nach 2 Sekunden (optional)
 	go func() {
 		time.Sleep(2 * time.Second)
 		a.app.QueueUpdateDraw(func() {
 			a.pages.HidePage("notification")
 		})
 	}()
-}
-
-// Erweiterte Tabellen-Erstellung mit mehr Optionen
-
-// Zusätzliche Styling-Funktionen
-func (a *App) applyGlobalStyling() {
-	// Globale App-Styling-Einstellungen
-	tview.Styles.PrimitiveBackgroundColor = tcell.ColorDefault
-	tview.Styles.ContrastBackgroundColor = tcell.ColorBlue
-	tview.Styles.MoreContrastBackgroundColor = tcell.ColorGreen
-	tview.Styles.BorderColor = ColorBorder
-	tview.Styles.TitleColor = ColorAccent
-	tview.Styles.GraphicsColor = ColorSecondary
-	tview.Styles.PrimaryTextColor = ColorText
-	tview.Styles.SecondaryTextColor = tcell.ColorGray
-	tview.Styles.TertiaryTextColor = tcell.ColorDarkGray
-	tview.Styles.InverseTextColor = tcell.ColorBlack
-	tview.Styles.ContrastSecondaryTextColor = tcell.ColorWhite
 }
