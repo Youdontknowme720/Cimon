@@ -38,6 +38,9 @@ func (a *App) createPipelinePage(proj config.GitLabProject) tview.Primitive {
 		case tcell.KeyEsc:
 			a.pages.SwitchToPage(PageHome)
 			return nil
+		case tcell.KeyEnter:
+			a.handlePipelineSelected(table, proj.ID)
+			return nil
 		}
 		return event
 	})
@@ -100,19 +103,15 @@ func (a *App) createPipelineFooter() *tview.TextView {
 	return footer
 }
 
-func (a *App) stylePipelineTree(tree *tview.TreeView, proj config.GitLabProject) {
-	tree.SetBorder(true)
-	tree.SetBorderColor(ColorOrange)
-	tree.SetTitle(fmt.Sprintf(" 📋 Pipelines für %s ", proj.Name))
-	tree.SetTitleAlign(tview.AlignLeft)
-	tree.SetTitleColor(ColorPink)
+func (a *App) handlePipelineSelected(table *tview.Table, projectID int) {
+	row, _ := table.GetSelection()
+	cell := table.GetCell(row, 0)
+	if cell == nil {
+		a.showNotification("Keine Pipeline-Daten verfügbar", ColorWarning)
+		return
+	}
 
-	tree.SetGraphics(true)
-	tree.SetTopLevel(1)
-}
-
-func (a *App) handlePipelineSelected(node *tview.TreeNode, projectID int) {
-	ref := node.GetReference()
+	ref := cell.GetReference()
 	if ref == nil {
 		a.showNotification("Keine Pipeline-Daten verfügbar", ColorWarning)
 		return
