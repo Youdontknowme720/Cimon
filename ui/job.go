@@ -17,7 +17,7 @@ func (a *App) createJobPage(projectID int, pipelineID int) tview.Primitive {
 
 	tree := a.handleJobClick(fmt.Sprint(projectID), pipelineID)
 
-	a.styleJobTree(tree, projectID, pipelineID)
+	a.styleJobTree(tree, projectID)
 
 	footer := a.createJobFooter()
 
@@ -46,21 +46,21 @@ func (a *App) createJobPage(projectID int, pipelineID int) tview.Primitive {
 	})
 
 	container.
-		AddItem(header, 4, 0, false).
+		AddItem(header, 5, 0, false).
 		AddItem(tree, 0, 1, true).
-		AddItem(footer, 2, 0, false)
+		AddItem(footer, 4, 0, false)
 
 	return container
 }
 
 func (a *App) createJobHeader(projectID int, pipelineID int) *tview.TextView {
 	header := tview.NewTextView().
-		SetDynamicColors(true).
 		SetRegions(true).
 		SetTextAlign(tview.AlignCenter)
+	header.SetBackgroundColor(ColorBlue)
 
 	headerText := fmt.Sprintf(
-		"⚙️ [::bu]Jobs für Pipeline #%d[::-]\n[::d]Projekt-ID: %d | Letzte Aktualisierung: %s[::-]",
+		"⚙️ [::bu]Jobs for pipeline #%d[::-]\n[::d]Projekt-ID: %d | last updated: %s[::-]",
 		pipelineID,
 		projectID,
 		time.Now().Format("15:04:05"),
@@ -69,7 +69,7 @@ func (a *App) createJobHeader(projectID int, pipelineID int) *tview.TextView {
 	header.SetText(headerText)
 
 	header.SetBorder(true)
-	header.SetBorderColor(ColorPrimary)
+	header.SetBorderColor(ColorOrange)
 	header.SetTitle(" 🔨 Job Übersicht ")
 	header.SetTitleAlign(tview.AlignCenter)
 	header.SetTitleColor(ColorAccent)
@@ -93,13 +93,15 @@ func (a *App) createJobFooter() *tview.TextView {
 	return footer
 }
 
-func (a *App) styleJobTree(tree *tview.TreeView, projectID int, pipelineID int) {
+func (a *App) styleJobTree(tree *tview.TreeView, pipelineID int) {
 	tree.SetBorder(true)
-	tree.SetBorderColor(ColorBorder)
+	tree.SetBorderColor(ColorOrange)
 	tree.SetTitle(fmt.Sprintf(" 📋 Jobs für Pipeline #%d ", pipelineID))
 	tree.SetTitleAlign(tview.AlignLeft)
 	tree.SetTitleColor(ColorPrimary)
+	tree.SetBackgroundColor(ColorBlue)
 
+	tree.SetGraphicsColor(ColorPink)
 	tree.SetGraphics(true)
 	tree.SetTopLevel(1)
 }

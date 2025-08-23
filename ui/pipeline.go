@@ -16,13 +16,13 @@ func (a *App) createPipelinePage(proj config.GitLabProject) tview.Primitive {
 
 	header := a.createPipelineHeader(proj)
 
-	tree := a.handlePipelineClick(fmt.Sprint(proj.ID))
+	table := a.handlePipelineClick(fmt.Sprint(proj.ID))
 
-	a.stylePipelineTree(tree, proj)
+	a.stylePipelineTable(table, proj)
 
 	footer := a.createPipelineFooter()
 
-	tree.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
+	table.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
 		switch event.Key() {
 		case tcell.KeyRune:
 			switch event.Rune() {
@@ -32,7 +32,7 @@ func (a *App) createPipelinePage(proj config.GitLabProject) tview.Primitive {
 				return nil
 			case 'r', 'R':
 				a.showNotification("Aktualisiere Pipelines...", ColorPrimary)
-				a.refreshPipelines(tree, proj)
+				a.refreshPipelines(table, proj)
 				return nil
 			}
 		case tcell.KeyEsc:
@@ -42,16 +42,21 @@ func (a *App) createPipelinePage(proj config.GitLabProject) tview.Primitive {
 		return event
 	})
 
-	tree.SetSelectedFunc(func(node *tview.TreeNode) {
-		a.handlePipelineSelected(node, proj.ID)
-	})
-
 	container.
 		AddItem(header, 5, 0, false).
-		AddItem(tree, 0, 1, true).
+		AddItem(table, 0, 1, true).
 		AddItem(footer, 2, 0, false)
 
 	return container
+}
+
+func (a *App) stylePipelineTable(table *tview.Table, proj config.GitLabProject) {
+	table.SetBorder(true)
+	table.SetBorderColor(ColorOrange)
+	table.SetTitle(fmt.Sprintf(" 📋 Pipelines für %s ", proj.Name))
+	table.SetTitleAlign(tview.AlignLeft)
+	table.SetTitleColor(ColorPink)
+	table.SetBackgroundColor(ColorBlue)
 }
 
 func (a *App) createPipelineHeader(proj config.GitLabProject) *tview.TextView {
@@ -124,62 +129,48 @@ func (a *App) handlePipelineSelected(node *tview.TreeNode, projectID int) {
 	}
 }
 
-func (a *App) handlePipelineClick(projectID string) *tview.TreeView {
-	loadingNode := tview.NewTreeNode("⏳ Lade Pipelines...").
-		SetColor(ColorPrimary).
+func (a *App) handlePipelineClick(projectID string) *tview.Table {
+	table := tview.NewTable().
+		SetBorders(true).
+		SetSelectable(true, false)
+
+	table.SetBackgroundColor(ColorBlue)
+
+	loadingCell := tview.NewTableCell("⏳ Lade Pipelines...").
+		SetTextColor(ColorPrimary).
 		SetSelectable(false)
-
-	tree := tview.NewTreeView().
-		SetRoot(loadingNode).
-		SetCurrentNode(loadingNode)
-
-	tree.SetBackgroundColor(ColorBlue)
-
-	var lastSelected *tview.TreeNode
-
-	tree.SetChangedFunc(func(node *tview.TreeNode) {
-		if lastSelected != nil {
-			if pipeline, ok := lastSelected.GetReference().(gitlab.Pipeline); ok {
-				lastSelected.SetColor(a.getStatusColor(pipeline.Status))
-			}
-		}
-
-		if node != nil && node.GetReference() != nil {
-			node.SetColor(tcell.ColorYellow) // oder ColorSuccess, ColorPink, etc.
-			lastSelected = node
-		}
-	})
+	table.SetCell(0, 0, loadingCell)
 
 	pipelines, err := gitlab.GetAllPipelines(projectID, a.token, 5)
 	if err != nil {
-		errorNode := tview.NewTreeNode("❌ Fehler beim Laden der Pipelines: " + err.Error()).
-			SetColor(ColorDanger).
+		errorCell := tview.NewTableCell("❌ Fehler beim Laden der Pipelines: " + err.Error()).
+			SetTextColor(ColorDanger).
 			SetSelectable(false)
-		tree.SetRoot(errorNode)
-		return tree
+		table.SetCell(0, 0, errorCell)
+		return table
 	}
 
-	root := tview.NewTreeNode("🔧 Pipelines (" + fmt.Sprint(len(pipelines)) + ")").
-		SetColor(ColorPink).
-		SetExpanded(true).
-		SetSelectable(false)
+	table.Clear()
 
-	for _, p := range pipelines {
-		pipelineNode := a.createPipelineNode(projectID, p)
-		root.AddChild(pipelineNode)
+	headerCell := tview.NewTableCell("🔧 Pipelines (" + fmt.Sprint(len(pipelines)) + ")").
+		SetTextColor(ColorPink).
+		SetSelectable(false).
+		SetAttributes(tcell.AttrBold)
+	table.SetCell(0, 0, headerCell)
+
+	for i, p := range pipelines {
+		pipelineCell := a.createPipelineCell(projectID, p)
+		table.SetCell(i+1, 0, pipelineCell)
 	}
 
-	tree.SetRoot(root)
-	tree.SetCurrentNode(root)
-
-	if len(root.GetChildren()) > 0 {
-		tree.SetCurrentNode(root.GetChildren()[0])
+	if len(pipelines) > 0 {
+		table.Select(1, 0) // Erste Pipeline auswählen
 	}
 
-	return tree
+	return table
 }
 
-func (a *App) createPipelineNode(projectID string, pipeline gitlab.Pipeline) *tview.TreeNode {
+func (a *App) createPipelineCell(projectID string, pipeline gitlab.Pipeline) *tview.TableCell {
 	commitMessage, err := gitlab.GetCommit(projectID, pipeline.Sha, a.token)
 	if err != nil {
 		commitMessage = &gitlab.Commit{Message: "Unknown commit message"}
@@ -193,22 +184,22 @@ func (a *App) createPipelineNode(projectID string, pipeline gitlab.Pipeline) *tv
 		message = message[:57] + "..."
 	}
 
-	nodeText := fmt.Sprintf("[white:#0d1164]%s Pipeline #%d: %s[-:-:-]",
+	cellText := fmt.Sprintf("%s Pipeline #%d: %s",
 		statusEmoji,
 		pipeline.ID,
 		strings.TrimSpace(message))
 
 	if len(pipeline.Sha) >= 8 {
 		shortSha := pipeline.Sha[:8]
-		nodeText += fmt.Sprintf("[gray:#0d1164](%s)[-:-:-]", shortSha)
+		cellText += fmt.Sprintf(" (%s)", shortSha)
 	}
 
-	pipelineNode := tview.NewTreeNode(nodeText).
+	cell := tview.NewTableCell(cellText).
 		SetReference(pipeline).
-		SetColor(nodeColor).
+		SetTextColor(nodeColor).
 		SetSelectable(true)
 
-	return pipelineNode
+	return cell
 }
 
 func (a *App) getStatusColor(status string) tcell.Color {
@@ -228,20 +219,29 @@ func (a *App) getStatusColor(status string) tcell.Color {
 	}
 }
 
-func (a *App) refreshPipelines(tree *tview.TreeView, proj config.GitLabProject) {
-	loadingNode := tview.NewTreeNode("⏳ Aktualisiere Pipelines...").
-		SetColor(ColorPrimary).
+func (a *App) refreshPipelines(table *tview.Table, proj config.GitLabProject) {
+	loadingCell := tview.NewTableCell("⏳ Aktualisiere Pipelines...").
+		SetTextColor(ColorPrimary).
 		SetSelectable(false)
 
-	tree.SetRoot(loadingNode)
+	table.Clear()
+	table.SetCell(0, 0, loadingCell)
 
 	go func() {
-		time.Sleep(500 * time.Millisecond) // Simulate loading
+		time.Sleep(500 * time.Millisecond)
 
 		a.app.QueueUpdateDraw(func() {
-			newTree := a.handlePipelineClick(fmt.Sprint(proj.ID))
-			// Tree-Inhalt aktualisieren
-			tree.SetRoot(newTree.GetRoot())
+			newTable := a.handlePipelineClick(fmt.Sprint(proj.ID))
+
+			// Kopiere Inhalt zur bestehenden Table
+			table.Clear()
+			for row := 0; row < newTable.GetRowCount(); row++ {
+				for col := 0; col < newTable.GetColumnCount(); col++ {
+					if cell := newTable.GetCell(row, col); cell != nil {
+						table.SetCell(row, col, cell)
+					}
+				}
+			}
 
 			a.showNotification("Pipelines aktualisiert!", ColorSuccess)
 		})
