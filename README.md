@@ -22,16 +22,15 @@
 git clone https://github.com/Youdontknowme720/Cimon.git
 cd Cimon
 ```
-```
 
-2. Build the project with go
-
+2. Build the project with go:
 ```bash
 go build -o cimon
-```
 
+```
 3. Run the application
 
 ```bash
 ./cimon
+```
 ```
