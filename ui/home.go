@@ -71,20 +71,12 @@ func (a *App) createStyledProjectTable(projects []config.GitLabProject) *tview.T
 			Foreground(ColorPink).
 			Bold(true))
 
-	settingsCell := tview.NewTableCell("+ Settings ").
-		SetAlign(tview.AlignLeft).
-		SetSelectable(true).
-		SetReference("Settings").
-		SetTextColor(tcell.ColorWhite).
-		SetBackgroundColor(ColorBlue)
+	settingsButtons := a.createSettingsButtons()
+	for pos, cell := range settingsButtons {
+		table.SetCell(pos[0], pos[1], cell)
+	}
 
-	table.SetCell(0, 0, settingsCell)
-
-	separatorCell := tview.NewTableCell("").
-		SetAlign(tview.AlignLeft).
-		SetSelectable(false)
-	table.SetCell(1, 0, separatorCell)
-	table.SetCell(2, 0, separatorCell)
+	table.SetCell(2, 0, tview.NewTableCell("").SetSelectable(false))
 
 	for i, project := range projects {
 		cellText := fmt.Sprintf("- %s ", project.Name)
@@ -95,7 +87,7 @@ func (a *App) createStyledProjectTable(projects []config.GitLabProject) *tview.T
 			SetReference(project).
 			SetTextColor(ColorText)
 
-		table.SetCell(2*i+3, 0, cell)
+		table.SetCell(3+i, 0, cell)
 	}
 
 	table.SetSelectedFunc(func(row, column int) {
@@ -107,8 +99,6 @@ func (a *App) createStyledProjectTable(projects []config.GitLabProject) *tview.T
 		case tcell.KeyEsc:
 			a.app.Stop()
 			return nil
-		case tcell.KeyCtrlR:
-			return nil
 		}
 		return event
 	})
@@ -116,21 +106,37 @@ func (a *App) createStyledProjectTable(projects []config.GitLabProject) *tview.T
 	return table
 }
 
-func (a *App) getProjectIcon(project config.GitLabProject) string {
-	icons := []string{"🔧", "🏗️", "📦", "🌐", "🔬", "📱", "💻", "⚡"}
+func (a *App) createSettingsButtons() map[[2]int]*tview.TableCell {
+	buttons := make(map[[2]int]*tview.TableCell)
 
-	hash := 0
-	for _, char := range project.Name {
-		hash += int(char)
-	}
+	addProjectCell := tview.NewTableCell("+ Add Project").
+		SetAlign(tview.AlignCenter).
+		SetSelectable(true).
+		SetReference("AddProj").
+		SetTextColor(tcell.ColorWhite).
+		SetBackgroundColor(ColorBlue)
 
-	return icons[hash%len(icons)]
+	addTokenCell := tview.NewTableCell("+ Add Token").
+		SetAlign(tview.AlignCenter).
+		SetSelectable(true).
+		SetReference("AddToken").
+		SetTextColor(tcell.ColorWhite).
+		SetBackgroundColor(ColorBlue)
+
+	buttons[[2]int{0, 0}] = addProjectCell
+	buttons[[2]int{1, 0}] = addTokenCell
+
+	return buttons
 }
 
 func (a *App) handleHomeSelected(row, column int, table *tview.Table) {
 	cell := table.GetCell(row, column)
-	ref := cell.GetReference()
+	if cell == nil {
+		a.showNotification("Keine Zelle ausgewählt", ColorWarning)
+		return
+	}
 
+	ref := cell.GetReference()
 	if ref == nil {
 		a.showNotification("Keine Referenz – Auswahl ignoriert", ColorWarning)
 		return
@@ -144,11 +150,13 @@ func (a *App) handleHomeSelected(row, column int, table *tview.Table) {
 		a.pages.SwitchToPage(PagePipeline)
 
 	case string:
-		if v == "Settings" {
-			a.showNotification("Öffne Einstellungen...", ColorSuccess)
-			page := a.createSettingsPage()
-			a.pages.AddPage(PageSettings, page, true, true)
-			a.pages.SwitchToPage(PageSettings)
+		switch v {
+		case "AddProj":
+			a.handleAddingProject()
+		case "AddToken":
+			a.handleAddingToken()
+		default:
+			a.showNotification("Unbekannter Button – Auswahl ignoriert", ColorDanger)
 		}
 
 	default:
