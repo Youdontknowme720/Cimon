@@ -19,24 +19,25 @@
 1. Clone the repository:
 
 ```bash
+
 git clone https://github.com/Youdontknowme720/Cimon.git
 cd Cimon
+
 ```
 
 2. Build the project with go:
 ```bash
+
 go build -o cimon
 
 ```
 3. Run the application
-
 ```bash
+
 ./cimon
 
 ```
 ```
-
-# Cimon - GitLab Pipeline Monitor
 
 ## Usage
 
@@ -107,5 +108,6 @@ projects:
     name: "My Project"
   - id: 987654
     name: "Another Project"
-
+```
+```
 Replace `YOUR_GITLAB_PERSONAL_ACCESS_TOKEN` with the token you added in the app. The project IDs are numerical GitLab repository identifiers, and the names can be any descriptive string you like.
