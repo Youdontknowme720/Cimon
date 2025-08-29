@@ -116,7 +116,7 @@ func (a *App) handleJobClick(projectID string, pipelineID int) *tview.Table {
 				return
 			}
 
-			headerCell := tview.NewTableCell(fmt.Sprintf("⚙️ Jobs (%d)", len(jobs))).
+			headerCell := tview.NewTableCell(fmt.Sprintf("Jobs (%d)", len(jobs))).
 				SetTextColor(tcell.ColorWhite).
 				SetSelectable(false).
 				SetAttributes(tcell.AttrBold)

@@ -41,7 +41,7 @@ func (a *App) createHomeScreen(projects []config.GitLabProject) *tview.Flex {
 
 func (a *App) createHeader() *tview.TextView {
 	header := tview.NewTextView().
-		SetText("🚀 CIMON v2 - GitLab Pipeline Monitor\n Choose a project or add a new one within the settings").
+		SetText("CIMON v2 - GitLab Pipeline Monitor\n Choose a project or add a new one within the settings").
 		SetTextAlign(tview.AlignCenter).
 		SetRegions(true)
 
@@ -71,7 +71,7 @@ func (a *App) createStyledProjectTable(projects []config.GitLabProject) *tview.T
 			Foreground(ColorPink).
 			Bold(true))
 
-	settingsCell := tview.NewTableCell(" ⚙️  Settings").
+	settingsCell := tview.NewTableCell("+ Settings ").
 		SetAlign(tview.AlignLeft).
 		SetSelectable(true).
 		SetReference("Settings").
@@ -87,8 +87,7 @@ func (a *App) createStyledProjectTable(projects []config.GitLabProject) *tview.T
 	table.SetCell(2, 0, separatorCell)
 
 	for i, project := range projects {
-		icon := a.getProjectIcon(project)
-		cellText := fmt.Sprintf(" %s  %s", icon, project.Name)
+		cellText := fmt.Sprintf("- %s ", project.Name)
 
 		cell := tview.NewTableCell(cellText).
 			SetAlign(tview.AlignLeft).
