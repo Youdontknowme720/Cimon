@@ -1,113 +1,150 @@
 # Cimon - GitLab Pipeline Monitor
 
-**Cimon** is a terminal-based GitLab pipeline monitor written in Go using [tview](https://github.com/rivo/tview). It allows you to quickly view the status of your GitLab pipelines and jobs, manage multiple projects, and receive real-time updates directly from your terminal.
+**Cimon** is a terminal-based GitLab pipeline monitor written in Go using [tview](https://github.com/rivo/tview). It provides real-time monitoring of GitLab pipelines and jobs, multi-project management, and an intuitive terminal interface for DevOps workflows.
 
 ---
 
 ## Features
 
-- Monitor pipelines for multiple GitLab projects
-- View pipeline statuses with visual indicators (success, failed, running, pending, canceled)
-- Inspect job details including stage, duration, and status
-- Add multiple GitLab projects and tokens directly from the interface
-- Refresh pipelines and jobs on-demand
+- **Multi-project monitoring** - Track pipelines across multiple GitLab projects simultaneously
+- **Visual status indicators** - Clear emoji-based status display (success ✅, failed ❌, running 🔄, pending ⏳, canceled ⏹️)
+- **Detailed job inspection** - View job stages, durations, and execution details
+- **In-app configuration** - Add GitLab projects and tokens directly from the interface
+- **Real-time updates** - On-demand refresh capabilities with loading indicators
+- **Keyboard-driven navigation** - Efficient terminal-based workflow
 
 ---
 
 ## Installation
 
-1. Clone the repository:
+### Prerequisites
+- Go 1.19 or higher
+- GitLab personal access token with API read permissions
 
+### Build from source
 ```bash
-
 git clone https://github.com/Youdontknowme720/Cimon.git
 cd Cimon
-
-```
-
-2. Build the project with go:
-```bash
-
 go build -o cimon
-
-```
-3. Run the application
-```bash
-
 ./cimon
-
-```
 ```
 
-## Usage
+---
 
-When you first start **Cimon**, you will see the **Home screen**, which lists your configured GitLab projects. From here, you can:
+## Quick Start
 
-### Add a GitLab Token
+1. **Launch Cimon** - Run `./cimon` to open the Home screen
+2. **Add your GitLab token** - Select **+ Add Token** and enter your personal access token
+3. **Add a project** - Select **+ Add Project** and provide the GitLab project ID and display name
+4. **Monitor pipelines** - Select your project to view real-time pipeline status
 
-1. Select the **+ Add Token** button.
-2. Enter your GitLab personal access token (PAT) in the form.
-   - This token is required to fetch pipelines and job details from GitLab.
-3. Save the token to continue.
+---
 
-### Add a GitLab Project
+## Usage Guide
 
-1. Select the **+ Add Project** button.
-2. Enter the **Project ID** from GitLab (numerical identifier of the repository).
-3. Enter a **Project Name** of your choice (this is only for display in Cimon).
-4. Save the project.
+### Initial Setup
 
-> After adding a project and token, your configuration is stored automatically.
+#### Adding a GitLab Token
+1. Navigate to GitLab → Settings → Access Tokens
+2. Create a token with `read_api` scope
+3. In Cimon, select **+ Add Token**
+4. Paste your token and save
 
-### Viewing Pipelines
+#### Adding Projects
+1. Find your GitLab project ID (visible in project settings or URL)
+2. Select **+ Add Project** in Cimon
+3. Enter the numeric **Project ID** 
+4. Provide a descriptive **Project Name** for display
+5. Save the configuration
 
-1. After adding a project, select it from the Home screen.
-2. You will see a table listing the latest pipelines with **status icons**.
+### Monitoring Workflows
 
-Each pipeline displays:
+#### Pipeline Overview
+- Select any configured project from the Home screen
+- View pipelines with status indicators:
+  - ✅ Success - Pipeline completed successfully
+  - ❌ Failed - Pipeline failed
+  - 🔄 Running - Pipeline currently executing
+  - ⏳ Pending - Pipeline queued for execution
+  - ⏹️ Canceled - Pipeline was canceled
 
-- Status emoji
-- Commit message (truncated if too long)
-- Short SHA of the commit
+#### Job Details
+1. Select any pipeline to drill down into job details
+2. Inspect individual jobs showing:
+   - Job status and name
+   - Execution stage
+   - Runtime duration
+3. Select specific jobs for detailed modal view
 
-### Viewing Jobs
+#### Data Management
+- **Refresh**: Press `r` to update pipeline/job data
+- **Auto-save**: All configuration changes are saved automatically
+- **Loading indicators**: Visual feedback during data fetching
 
-1. Select a pipeline to view its jobs.
-2. Each job shows:
-   - Status emoji
-   - Job name (truncated if too long)
-   - Duration
-   - Stage
-3. Select a job to view details in a modal window.
+### Navigation Controls
 
-### Refreshing Data
+| Key | Action |
+|-----|--------|
+| `r` | Refresh current data |
+| `b` | Navigate back |
+| `Esc` | Exit application |
+| `Enter` | Select item |
+| `Tab` | Navigate between elements |
 
-- Press `r` while viewing pipelines or jobs to refresh the data.
-- The interface will show a loading indicator during updates.
-
-### Navigation
-
-- `b` → Go back to the previous screen  
-- `Esc` → Exit Cimon
+---
 
 ## Configuration
 
-Cimon stores your configuration in a **YAML file** (e.g., `config.yml`) located in the application folder. The configuration contains:
+Cimon automatically manages configuration in `config.yml` within the application directory.
 
-- Your GitLab token
-- The list of configured projects (Project ID + Project Name)
-
-> When adding a token or project via the Home screen, this file is updated automatically.
-
-### Example `config.yml`:
-
+### Configuration Structure
 ```yaml
-token: "YOUR_GITLAB_PERSONAL_ACCESS_TOKEN"
+token: "glpat-xxxxxxxxxxxxxxxxxxxx"
 projects:
-  - id: 123456
-    name: "My Project"
-  - id: 987654
-    name: "Another Project"
+  - id: 12345678
+    name: "Frontend Application"
+  - id: 87654321
+    name: "API Backend"
+  - id: 11223344
+    name: "DevOps Tools"
 ```
-```
-Replace `YOUR_GITLAB_PERSONAL_ACCESS_TOKEN` with the token you added in the app. The project IDs are numerical GitLab repository identifiers, and the names can be any descriptive string you like.
+
+### Security Notes
+- Store your `config.yml` securely and avoid committing it to version control
+- Use GitLab tokens with minimal required permissions (`read_api`)
+- Consider using environment-specific tokens for different GitLab instances
+
+---
+
+## Troubleshooting
+
+### Common Issues
+
+**"No pipelines found"**
+- Verify project ID is correct (numeric identifier from GitLab)
+- Ensure your token has `read_api` permissions
+- Check if the project has any pipelines
+
+**"Authentication failed"**
+- Confirm your GitLab token is valid and not expired
+- Verify token permissions include API access
+- Test token manually with GitLab API
+
+**"Connection timeout"**
+- Check network connectivity to GitLab instance
+- Verify GitLab server availability
+- Consider firewall or proxy restrictions
+
+### Getting Help
+- Check the [Issues](https://github.com/Youdontknowme720/Cimon/issues) page for known problems
+- Contribute bug reports with system information and error details
+
+---
+
+## Contributing
+
+Contributions are welcome! Please see our contributing guidelines and submit pull requests for any improvements.
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
