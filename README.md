@@ -139,12 +139,3 @@ projects:
 - Check the [Issues](https://github.com/Youdontknowme720/Cimon/issues) page for known problems
 - Contribute bug reports with system information and error details
 
----
-
-## Contributing
-
-Contributions are welcome! Please see our contributing guidelines and submit pull requests for any improvements.
-
-## License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
