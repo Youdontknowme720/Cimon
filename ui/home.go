@@ -32,12 +32,9 @@ func (a *App) createHomeScreen(projects []config.GitLabProject) *tview.Flex {
 
 	table := a.createStyledProjectTable(projects)
 
-	footer := a.createFooter()
-
 	mainContainer.
-		AddItem(header, 5, 0, false).
-		AddItem(table, 0, 1, true).
-		AddItem(footer, 5, 0, false)
+		AddItem(header, 3, 0, false).
+		AddItem(table, 0, 2, true)
 
 	return mainContainer
 }
@@ -118,23 +115,6 @@ func (a *App) createStyledProjectTable(projects []config.GitLabProject) *tview.T
 	})
 
 	return table
-}
-
-func (a *App) createFooter() *tview.TextView {
-	footer := tview.NewTextView().
-		SetText("Tastenkürzel:↑/↓ Navigation | Enter[::-] Auswählen Esc[::-] Beenden Ctrl+R[::-] Aktualisieren").
-		SetTextAlign(tview.AlignCenter).
-		SetRegions(true)
-
-	footer.SetBackgroundColor(ColorBlue)
-
-	footer.SetBorder(true).
-		SetBorderColor(ColorOrange).
-		SetTitle(" Hilfe ").
-		SetTitleAlign(tview.AlignCenter).
-		SetTitleColor(ColorPink)
-
-	return footer
 }
 
 func (a *App) getProjectIcon(project config.GitLabProject) string {

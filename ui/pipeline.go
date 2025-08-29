@@ -20,8 +20,6 @@ func (a *App) createPipelinePage(proj config.GitLabProject) tview.Primitive {
 
 	a.stylePipelineTable(table, proj)
 
-	footer := a.createPipelineFooter()
-
 	table.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
 		switch event.Key() {
 		case tcell.KeyRune:
@@ -46,9 +44,8 @@ func (a *App) createPipelinePage(proj config.GitLabProject) tview.Primitive {
 	})
 
 	container.
-		AddItem(header, 5, 0, false).
-		AddItem(table, 0, 1, true).
-		AddItem(footer, 2, 0, false)
+		AddItem(header, 3, 0, false).
+		AddItem(table, 0, 1, true)
 
 	return container
 }
@@ -85,22 +82,6 @@ func (a *App) createPipelineHeader(proj config.GitLabProject) *tview.TextView {
 	header.SetTitleColor(ColorPink)
 
 	return header
-}
-
-func (a *App) createPipelineFooter() *tview.TextView {
-	footer := tview.NewTextView().
-		SetText("Navigation:[::-] ↑/↓ Auswählen | Enter show jobs | B back | R[::-] update | Esc[::-] back to home").
-		SetTextAlign(tview.AlignCenter).
-		SetDynamicColors(true).
-		SetRegions(true)
-
-	footer.SetBorder(true)
-	footer.SetBorderColor(ColorSecondary)
-	footer.SetTitle(" Steuerung ")
-	footer.SetTitleAlign(tview.AlignCenter)
-	footer.SetTitleColor(ColorAccent)
-
-	return footer
 }
 
 func (a *App) handlePipelineSelected(table *tview.Table, projectID int) {
