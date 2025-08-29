@@ -29,7 +29,6 @@ func (a *App) createPipelinePage(proj config.GitLabProject) tview.Primitive {
 				a.pages.SwitchToPage(PageHome)
 				return nil
 			case 'r', 'R':
-				a.showNotification("Aktualisiere Pipelines...", ColorPrimary)
 				a.refreshPipelines(table, proj)
 				return nil
 			}
@@ -114,6 +113,8 @@ func (a *App) handlePipelineClick(projectID string) *tview.Table {
 		SetBorders(true).
 		SetSelectable(true, false)
 
+	table.SetBorder(true)
+	table.SetBorderColor(ColorOrange)
 	table.SetBackgroundColor(ColorBlue)
 
 	loadingCell := tview.NewTableCell("⏳ Lade Pipelines...").
