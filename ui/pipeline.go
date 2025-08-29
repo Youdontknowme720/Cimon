@@ -156,35 +156,42 @@ func (a *App) handlePipelineClick(projectID string) *tview.Table {
 }
 
 func (a *App) createPipelineCell(projectID string, pipeline gitlab.Pipeline) *tview.TableCell {
-	commitMessage, err := gitlab.GetCommit(projectID, pipeline.Sha, a.token)
-	if err != nil {
-		commitMessage = &gitlab.Commit{Message: "Unknown commit message"}
-	}
-
 	statusEmoji := gitlab.StatusEmoji(pipeline.Status)
 
-	message := commitMessage.Message
-	if len(message) > 60 {
-		message = message[:57] + "..."
-	}
-
-	cellText := fmt.Sprintf("%s Pipeline #%d: %s",
-		statusEmoji,
-		pipeline.ID,
-		strings.TrimSpace(message))
+	placeholderText := fmt.Sprintf("%s Pipeline : ⏳ Lade Commit...", statusEmoji)
 
 	if len(pipeline.Sha) >= 8 {
 		shortSha := pipeline.Sha[:8]
-		cellText += fmt.Sprintf(" (%s)", shortSha)
+		placeholderText += fmt.Sprintf(" (%s)", shortSha)
 	}
 
-	cell := tview.NewTableCell(cellText).
+	cell := tview.NewTableCell(placeholderText).
 		SetReference(pipeline).
 		SetTextColor(tcell.ColorWhite).
 		SetSelectedStyle(tcell.StyleDefault.
 			Background(ColorBlue).
 			Foreground(ColorPink).
 			Bold(true))
+
+	go func(cell *tview.TableCell, sha string) {
+		commit, err := gitlab.GetCommit(projectID, sha, a.token)
+		message := "Unknown commit message"
+		if err == nil {
+			message = commit.Message
+			if len(message) > 60 {
+				message = message[:57] + "..."
+			}
+		}
+
+		a.app.QueueUpdateDraw(func() {
+			newText := fmt.Sprintf("%s Pipeline : %s", statusEmoji, strings.TrimSpace(message))
+			if len(sha) >= 8 {
+				shortSha := sha[:8]
+				newText += fmt.Sprintf(" (%s)", shortSha)
+			}
+			cell.SetText(newText)
+		})
+	}(cell, pipeline.Sha)
 
 	return cell
 }
