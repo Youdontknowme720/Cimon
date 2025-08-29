@@ -110,14 +110,14 @@ func (a *App) createSettingsButtons() map[[2]int]*tview.TableCell {
 	buttons := make(map[[2]int]*tview.TableCell)
 
 	addProjectCell := tview.NewTableCell("+ Add Project").
-		SetAlign(tview.AlignCenter).
+		SetAlign(tview.AlignLeft).
 		SetSelectable(true).
 		SetReference("AddProj").
 		SetTextColor(tcell.ColorWhite).
 		SetBackgroundColor(ColorBlue)
 
 	addTokenCell := tview.NewTableCell("+ Add Token").
-		SetAlign(tview.AlignCenter).
+		SetAlign(tview.AlignLeft).
 		SetSelectable(true).
 		SetReference("AddToken").
 		SetTextColor(tcell.ColorWhite).
