@@ -121,31 +121,36 @@ func (a *App) handlePipelineClick(projectID string) *tview.Table {
 		SetSelectable(false)
 	table.SetCell(0, 0, loadingCell)
 
-	pipelines, err := gitlab.GetAllPipelines(projectID, a.token, 5)
-	if err != nil {
-		errorCell := tview.NewTableCell("❌ Fehler beim Laden der Pipelines: " + err.Error()).
-			SetTextColor(ColorDanger).
-			SetSelectable(false)
-		table.SetCell(0, 0, errorCell)
-		return table
-	}
+	go func() {
+		pipelines, err := gitlab.GetAllPipelines(projectID, a.token, 5)
 
-	table.Clear()
+		a.app.QueueUpdateDraw(func() {
+			table.Clear()
 
-	headerCell := tview.NewTableCell("🔧 Pipelines (" + fmt.Sprint(len(pipelines)) + ")").
-		SetTextColor(ColorPink).
-		SetSelectable(false).
-		SetAttributes(tcell.AttrBold)
-	table.SetCell(0, 0, headerCell)
+			if err != nil {
+				errorCell := tview.NewTableCell("❌ Fehler beim Laden der Pipelines: " + err.Error()).
+					SetTextColor(ColorDanger).
+					SetSelectable(false)
+				table.SetCell(0, 0, errorCell)
+				return
+			}
 
-	for i, p := range pipelines {
-		pipelineCell := a.createPipelineCell(projectID, p)
-		table.SetCell(i+1, 0, pipelineCell)
-	}
+			headerCell := tview.NewTableCell("🔧 Pipelines (" + fmt.Sprint(len(pipelines)) + ")").
+				SetTextColor(tcell.ColorWhite).
+				SetSelectable(false).
+				SetAttributes(tcell.AttrBold)
+			table.SetCell(0, 0, headerCell)
 
-	if len(pipelines) > 0 {
-		table.Select(1, 0) // Erste Pipeline auswählen
-	}
+			for i, p := range pipelines {
+				pipelineCell := a.createPipelineCell(projectID, p)
+				table.SetCell(i+1, 0, pipelineCell)
+			}
+
+			if len(pipelines) > 0 {
+				table.Select(1, 0)
+			}
+		})
+	}()
 
 	return table
 }
@@ -157,7 +162,6 @@ func (a *App) createPipelineCell(projectID string, pipeline gitlab.Pipeline) *tv
 	}
 
 	statusEmoji := gitlab.StatusEmoji(pipeline.Status)
-	nodeColor := a.getStatusColor(pipeline.Status)
 
 	message := commitMessage.Message
 	if len(message) > 60 {
@@ -176,27 +180,13 @@ func (a *App) createPipelineCell(projectID string, pipeline gitlab.Pipeline) *tv
 
 	cell := tview.NewTableCell(cellText).
 		SetReference(pipeline).
-		SetTextColor(nodeColor).
-		SetSelectable(true)
+		SetTextColor(tcell.ColorWhite).
+		SetSelectedStyle(tcell.StyleDefault.
+			Background(ColorBlue).
+			Foreground(ColorPink).
+			Bold(true))
 
 	return cell
-}
-
-func (a *App) getStatusColor(status string) tcell.Color {
-	switch strings.ToLower(status) {
-	case "success":
-		return ColorSuccess
-	case "failed":
-		return ColorDanger
-	case "running":
-		return ColorPrimary
-	case "pending":
-		return ColorWarning
-	case "canceled", "cancelled":
-		return tcell.ColorGray
-	default:
-		return ColorText
-	}
 }
 
 func (a *App) refreshPipelines(table *tview.Table, proj config.GitLabProject) {
@@ -208,22 +198,33 @@ func (a *App) refreshPipelines(table *tview.Table, proj config.GitLabProject) {
 	table.SetCell(0, 0, loadingCell)
 
 	go func() {
-		time.Sleep(500 * time.Millisecond)
+		pipelines, err := gitlab.GetAllPipelines(fmt.Sprint(proj.ID), a.token, 5)
 
 		a.app.QueueUpdateDraw(func() {
-			newTable := a.handlePipelineClick(fmt.Sprint(proj.ID))
-
-			// Kopiere Inhalt zur bestehenden Table
 			table.Clear()
-			for row := 0; row < newTable.GetRowCount(); row++ {
-				for col := 0; col < newTable.GetColumnCount(); col++ {
-					if cell := newTable.GetCell(row, col); cell != nil {
-						table.SetCell(row, col, cell)
-					}
-				}
+
+			if err != nil {
+				errorCell := tview.NewTableCell("❌ Fehler beim Laden der Pipelines: " + err.Error()).
+					SetTextColor(ColorDanger).
+					SetSelectable(false)
+				table.SetCell(0, 0, errorCell)
+				return
 			}
 
-			a.showNotification("Pipelines aktualisiert!", ColorSuccess)
+			headerCell := tview.NewTableCell("🔧 Pipelines (" + fmt.Sprint(len(pipelines)) + ")").
+				SetTextColor(ColorPink).
+				SetSelectable(false).
+				SetAttributes(tcell.AttrBold)
+			table.SetCell(0, 0, headerCell)
+
+			for i, p := range pipelines {
+				pipelineCell := a.createPipelineCell(fmt.Sprint(proj.ID), p)
+				table.SetCell(i+1, 0, pipelineCell)
+			}
+
+			if len(pipelines) > 0 {
+				table.Select(1, 0)
+			}
 		})
 	}()
 }

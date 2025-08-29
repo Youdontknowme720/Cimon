@@ -161,7 +161,6 @@ func (a *App) showNotification(message string, color tcell.Color) {
 	modal := tview.NewModal().
 		SetText(message).
 		SetTextColor(color).
-		AddButtons([]string{"OK"}).
 		SetDoneFunc(func(buttonIndex int, buttonLabel string) {
 			a.pages.HidePage("notification")
 		})
