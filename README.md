@@ -33,6 +33,8 @@ go build -o cimon
 ```bash
 ./cimon
 
+```
+```bash
 
 # Cimon - GitLab Pipeline Monitor
 
