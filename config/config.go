@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"path/filepath"
 
 	"gopkg.in/yaml.v2"
 )
@@ -20,6 +21,12 @@ type GitLabProject struct {
 }
 
 func ReadConfig() Config {
+	configDir := "config"
+	configPath := filepath.Join(configDir, "config.yml")
+
+	if _, err := os.Stat(configPath); os.IsNotExist(err) {
+		return createDefaultConfig(configDir, configPath)
+	}
 	data, err := os.ReadFile("config/config.yml")
 	if err != nil {
 		log.Fatal("Error during reading config.yml")
@@ -30,6 +37,29 @@ func ReadConfig() Config {
 		log.Fatal("Couldn't read data")
 	}
 	return cfg
+}
+
+func createDefaultConfig(configDir, configPath string) Config {
+	if err := os.MkdirAll(configDir, 0755); err != nil {
+		log.Printf("Warning: Could not create config directory: %v", err)
+	}
+
+	defaultConfig := Config{
+		Token:    "",
+		Projects: []GitLabProject{},
+	}
+
+	defaultYAML := `token: ""
+projects:
+`
+
+	if err := os.WriteFile(configPath, []byte(defaultYAML), 0644); err != nil {
+		log.Printf("Warning: Could not create default config file: %v", err)
+	} else {
+		log.Printf("Created default config at: %s", configPath)
+	}
+
+	return defaultConfig
 }
 
 func GetProjectData() (string, []GitLabProject) {
