@@ -193,8 +193,8 @@ func (a *App) refreshJobs(table *tview.Table, projectID int, pipelineID int) {
 				return
 			}
 
-			headerCell := tview.NewTableCell(fmt.Sprintf("⚙️ Jobs (%d)", len(jobs))).
-				SetTextColor(ColorPrimary).
+			headerCell := tview.NewTableCell(fmt.Sprintf("Jobs (%d)", len(jobs))).
+				SetTextColor(tcell.ColorWhite).
 				SetSelectable(false).
 				SetAttributes(tcell.AttrBold)
 			table.SetCell(0, 0, headerCell)

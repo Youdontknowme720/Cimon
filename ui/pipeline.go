@@ -118,7 +118,7 @@ func (a *App) handlePipelineClick(projectID string) *tview.Table {
 	table.SetBackgroundColor(ColorBlue)
 
 	loadingCell := tview.NewTableCell("⏳ Lade Pipelines...").
-		SetTextColor(ColorPrimary).
+		SetTextColor(tcell.ColorWhite).
 		SetSelectable(false)
 	table.SetCell(0, 0, loadingCell)
 
@@ -199,7 +199,7 @@ func (a *App) createPipelineCell(projectID string, pipeline gitlab.Pipeline) *tv
 
 func (a *App) refreshPipelines(table *tview.Table, proj config.GitLabProject) {
 	loadingCell := tview.NewTableCell("⏳ Aktualisiere Pipelines...").
-		SetTextColor(ColorPrimary).
+		SetTextColor(tcell.ColorWhite).
 		SetSelectable(false)
 
 	table.Clear()
@@ -220,7 +220,7 @@ func (a *App) refreshPipelines(table *tview.Table, proj config.GitLabProject) {
 			}
 
 			headerCell := tview.NewTableCell("🔧 Pipelines (" + fmt.Sprint(len(pipelines)) + ")").
-				SetTextColor(ColorPink).
+				SetTextColor(tcell.ColorWhite).
 				SetSelectable(false).
 				SetAttributes(tcell.AttrBold)
 			table.SetCell(0, 0, headerCell)
