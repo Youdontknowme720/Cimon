@@ -46,27 +46,18 @@ func (a *App) handleAddingToken() {
 }
 
 func (a *App) handleAddingProject() {
-	projectField := tview.NewInputField().
-		SetLabel("ProjectID: ").
-		SetFieldWidth(40).
-		SetFieldTextColor(tcell.ColorWhite).
-		SetLabelColor(tcell.ColorWhite)
-
-	projectName := tview.NewInputField().
-		SetLabel("ProjectName: ").
-		SetFieldWidth(40).
-		SetFieldTextColor(tcell.ColorWhite).
-		SetLabelColor(ColorPink)
-
 	form := tview.NewForm().
-		AddFormItem(projectField).
-		AddFormItem(projectName)
+		AddInputField("ProjectName", "", 0, nil, nil).
+		AddInputField("ProjectID", "", 0, nil, nil)
 
 	form.SetBorder(true).SetTitle("... Editing ...").SetTitleAlign(tview.AlignCenter)
+	form.SetFieldBackgroundColor(ColorOrange)
+	form.SetFieldTextColor(tcell.ColorBlack)
+	form.SetLabelColor(tcell.ColorWhite)
 	form.SetTitleColor(ColorPink)
 	form.SetBorderColor(ColorOrange)
 	form.SetBackgroundColor(ColorBlue)
-	form.SetButtonBackgroundColor(ColorBlue)
+	form.SetButtonBackgroundColor(ColorOrange)
 	form.SetButtonTextColor(tcell.ColorWhite)
 
 	configOverviewTable := tview.NewTable()
@@ -79,6 +70,7 @@ func (a *App) handleAddingProject() {
 	}
 	configOverviewTable.SetTitle("Current projects definied in config").
 		SetTitleAlign(tview.AlignCenter).
+		SetTitleColor(ColorPink).
 		SetBorder(true).
 		SetBorderColor(ColorOrange).
 		SetBackgroundColor(ColorBlue)
@@ -123,24 +115,4 @@ func (a *App) handleAddingProject() {
 		AddItem(configOverviewTable, 0, 1, false)
 	a.pages.AddPage(PageAddProj, flex, true, true)
 	a.pages.SwitchToPage(PageAddProj)
-}
-
-func (a *App) handleSettingsClick() *tview.Table {
-	tableHeader := map[string]string{
-		"Add new project":   "Add",
-		"Delete project":    "Del",
-		"Configure project": "Conf",
-		"Add new Token":     "Tok",
-	}
-	table := newSelectableTable()
-	cnt := 0
-	for key, value := range tableHeader {
-		cell := tview.NewTableCell(key).
-			SetAlign(tview.AlignLeft).
-			SetSelectable(true).
-			SetReference(value)
-		table.SetCell(cnt, 0, cell)
-		cnt++
-	}
-	return table
 }
