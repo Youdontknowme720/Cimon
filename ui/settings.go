@@ -9,47 +9,12 @@ import (
 	"github.com/rivo/tview"
 )
 
-func (a *App) createSettingsPage() tview.Primitive {
-	table := a.handleSettingsClick()
-
-	table.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
-		if event.Key() == tcell.KeyRune && event.Rune() == 'b' {
-			a.pages.SwitchToPage(PageHome)
-			return nil
-		}
-		return event
-	})
-
-	table.SetSelectedFunc(func(row, column int) {
-		cell := table.GetCell(row, column)
-		ref := cell.GetReference()
-
-		if ref == nil {
-			fmt.Println("Keine Referenz – Auswahl ignoriert")
-			return
-		}
-
-		if refStr, ok := ref.(string); ok {
-			switch refStr {
-			case "Add":
-				a.handleAddingProject()
-			case "Del":
-				fmt.Println("Deleting project...")
-			case "Conf":
-				fmt.Println("Configuring project...")
-			case "Tok":
-				a.handleAddingToken()
-			}
-		}
-	})
-	return table
-}
-
 func (a *App) handleAddingToken() {
 	form := tview.NewForm().
 		AddInputField("Token", "", 20, nil, nil)
 	form.SetFieldTextColor(tcell.ColorBlack)
 	form.SetBorder(true).SetTitle("Editing ...").SetTitleAlign(tview.AlignCenter)
+	form.SetBorderColor(ColorOrange)
 
 	saveFunc := func() {
 		newToken := form.GetFormItemByLabel("Token").(*tview.InputField).GetText()
@@ -81,12 +46,28 @@ func (a *App) handleAddingToken() {
 }
 
 func (a *App) handleAddingProject() {
-	form := tview.NewForm().
-		AddInputField("ProjectID", "", 20, nil, nil).
-		AddInputField("ProjectName", "", 20, nil, nil)
+	projectField := tview.NewInputField().
+		SetLabel("ProjectID: ").
+		SetFieldWidth(40).
+		SetFieldTextColor(tcell.ColorWhite).
+		SetLabelColor(tcell.ColorWhite)
 
-	form.SetFieldTextColor(tcell.ColorBlack)
-	form.SetBorder(true).SetTitle("Editing ...").SetTitleAlign(tview.AlignCenter)
+	projectName := tview.NewInputField().
+		SetLabel("ProjectName: ").
+		SetFieldWidth(40).
+		SetFieldTextColor(tcell.ColorWhite).
+		SetLabelColor(ColorPink)
+
+	form := tview.NewForm().
+		AddFormItem(projectField).
+		AddFormItem(projectName)
+
+	form.SetBorder(true).SetTitle("... Editing ...").SetTitleAlign(tview.AlignCenter)
+	form.SetTitleColor(ColorPink)
+	form.SetBorderColor(ColorOrange)
+	form.SetBackgroundColor(ColorBlue)
+	form.SetButtonBackgroundColor(ColorBlue)
+	form.SetButtonTextColor(tcell.ColorWhite)
 
 	configOverviewTable := tview.NewTable()
 	_, activeProjects := config.GetProjectData()
@@ -98,7 +79,9 @@ func (a *App) handleAddingProject() {
 	}
 	configOverviewTable.SetTitle("Current projects definied in config").
 		SetTitleAlign(tview.AlignCenter).
-		SetBorder(true)
+		SetBorder(true).
+		SetBorderColor(ColorOrange).
+		SetBackgroundColor(ColorBlue)
 
 	saveFunc := func() {
 		name := form.GetFormItemByLabel("ProjectName").(*tview.InputField).GetText()
